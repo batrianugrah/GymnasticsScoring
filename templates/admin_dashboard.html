@@ -1,63 +1,15 @@
 {% extends 'layout.html' %}
-
 {% block title %}Admin Dashboard{% endblock %}
-
 {% block content %}
 <div class="text-center mb-5">
     <h1>🔑 Admin Dashboard</h1>
     <p class="lead">Pusat kontrol untuk mengelola semua data master aplikasi.</p>
 </div>
-
 <div class="row text-center g-4">
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="display-4">👥</h2>
-                <h5 class="card-title">Manajemen Peserta</h5>
-                <p class="card-text">Tambah, hapus, atau edit data peserta pertandingan.</p>
-                <a href="{{ url_for('admin_manage_peserta') }}" class="btn btn-primary">Kelola Peserta</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="display-4">🗺️</h2>
-                <h5 class="card-title">Manajemen Daerah</h5>
-                <p class="card-text">Kelola daftar kabupaten/kota yang berpartisipasi.</p>
-                <a href="{{ url_for('admin_manage_generic', master_type='daerah') }}" class="btn btn-primary">Kelola Daerah</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="display-4">🏆</h2>
-                <h5 class="card-title">Manajemen Kategori</h5>
-                <p class="card-text">Kelola jenis kategori pertandingan (Artistik, Ritmik, dll).</p>
-                <a href="{{ url_for('admin_manage_generic', master_type='kategori') }}" class="btn btn-primary">Kelola Kategori</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="display-4">🏷️</h2>
-                <h5 class="card-title">Manajemen Grup</h5>
-                <p class="card-text">Kelola grup pertandingan (Junior, Senior, dll).</p>
-                <a href="{{ url_for('admin_manage_generic', master_type='grup') }}" class="btn btn-primary">Kelola Grup</a>
-            </div>
-        </div>
-    </div>
-    <div class="col-md-4">
-        <div class="card h-100 shadow-sm">
-            <div class="card-body">
-                <h2 class="display-4">🤸‍♀️</h2>
-                <h5 class="card-title">Manajemen Alat</h5>
-                <p class="card-text">Kelola daftar alat yang digunakan dalam pertandingan.</p>
-                <a href="{{ url_for('admin_manage_generic', master_type='alat') }}" class="btn btn-primary">Kelola Alat</a>
-            </div>
-        </div>
-    </div>
+    <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body"><h2 class="display-4">👥</h2><h5 class="card-title">Manajemen Peserta</h5><p class="card-text">Tambah atau hapus data peserta pertandingan.</p><a href="{{ url_for('admin_manage_peserta') }}" class="btn btn-primary">Kelola Peserta</a></div></div></div>
+    <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body"><h2 class="display-4">🗺️</h2><h5 class="card-title">Manajemen Daerah</h5><p class="card-text">Kelola daftar kabupaten/kota.</p><a href="{{ url_for('admin_manage_generic', master_type='daerah') }}" class="btn btn-primary">Kelola Daerah</a></div></div></div>
+    <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body"><h2 class="display-4">🏆</h2><h5 class="card-title">Manajemen Kategori</h5><p class="card-text">Kelola jenis kategori pertandingan.</p><a href="{{ url_for('admin_manage_generic', master_type='kategori') }}" class="btn btn-primary">Kelola Kategori</a></div></div></div>
+    <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body"><h2 class="display-4">🏷️</h2><h5 class="card-title">Manajemen Grup</h5><p class="card-text">Kelola grup pertandingan.</p><a href="{{ url_for('admin_manage_generic', master_type='grup') }}" class="btn btn-primary">Kelola Grup</a></div></div></div>
+    <div class="col-md-4"><div class="card h-100 shadow-sm"><div class="card-body"><h2 class="display-4">🤸‍♀️</h2><h5 class="card-title">Manajemen Alat</h5><p class="card-text">Kelola daftar alat pertandingan.</p><a href="{{ url_for('admin_manage_generic', master_type='alat') }}" class="btn btn-primary">Kelola Alat</a></div></div></div>
 </div>
 {% endblock %}

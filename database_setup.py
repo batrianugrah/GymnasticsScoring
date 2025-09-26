@@ -15,12 +15,12 @@ ALAT_LIST = [
     "Parallel Bars", "Horizontal Bar", "Uneven Bars", "Balance Beam",
     "Rope", "Hoop", "Ball", "Clubs", "Ribbon"
 ]
-PESERTA_CONTOH = [
-    {"nama": "Budi Santoso", "daerah": "Padang"},
-    {"nama": "Citra Lestari", "daerah": "Bukittinggi"},
-    {"nama": "Doni Firmansyah", "daerah": "Payakumbuh"},
-    {"nama": "Eka Putri", "daerah": "Solok"},
-]
+# PESERTA_CONTOH = [
+#     {"nama": "Budi Santoso", "daerah": "Padang"},
+#     {"nama": "Citra Lestari", "daerah": "Bukittinggi"},
+#     {"nama": "Doni Firmansyah", "daerah": "Payakumbuh"},
+#     {"nama": "Eka Putri", "daerah": "Solok"},
+# ]
 
 def insert_unique(model, nama):
     """Insert data only if it doesn't already exist."""
@@ -49,23 +49,23 @@ def insert_master_data():
         db.session.rollback()
         print("❌ Gagal memasukkan data master:", e)
 
-def insert_peserta_data():
-    print("👥 Memasukkan data peserta...")
+# def insert_peserta_data():
+#     print("👥 Memasukkan data peserta...")
 
-    for p in PESERTA_CONTOH:
-        daerah_obj = Daerah.query.filter_by(nama=p['daerah']).first()
-        if daerah_obj:
-            if not db.session.query(Peserta).filter_by(nama=p['nama'], daerah_id=daerah_obj.id).first():
-                db.session.add(Peserta(nama=p['nama'], daerah_id=daerah_obj.id))
-        else:
-            print(f"⚠️ Daerah '{p['daerah']}' tidak ditemukan untuk peserta '{p['nama']}'.")
+#     for p in PESERTA_CONTOH:
+#         daerah_obj = Daerah.query.filter_by(nama=p['daerah']).first()
+#         if daerah_obj:
+#             if not db.session.query(Peserta).filter_by(nama=p['nama'], daerah_id=daerah_obj.id).first():
+#                 db.session.add(Peserta(nama=p['nama'], daerah_id=daerah_obj.id))
+#         else:
+#             print(f"⚠️ Daerah '{p['daerah']}' tidak ditemukan untuk peserta '{p['nama']}'.")
 
-    try:
-        db.session.commit()
-        print("✅ Data peserta berhasil dimasukkan.")
-    except IntegrityError as e:
-        db.session.rollback()
-        print("❌ Gagal memasukkan data peserta:", e)
+#     try:
+#         db.session.commit()
+#         print("✅ Data peserta berhasil dimasukkan.")
+#     except IntegrityError as e:
+#         db.session.rollback()
+#         print("❌ Gagal memasukkan data peserta:", e)
 
 def setup_database():
     with app.app_context():
@@ -74,7 +74,7 @@ def setup_database():
         db.create_all()
 
         insert_master_data()
-        insert_peserta_data()
+        # insert_peserta_data()
 
         print("="*30)
         print("🎉 Setup basis data selesai!")

@@ -1,27 +1,7 @@
-body {
-    background-color: #f8f9fa;
-}
-
-.navbar-brand {
-    font-weight: bold;
-}
-
-.card-header {
-    font-weight: 500;
-}
-
-#live-score-table td {
-    vertical-align: middle;
-    font-size: 1.1rem;
-}
-
-#live-score-table tr:first-child {
-    background-color: #ffd700; /* Emas */
-    font-weight: bold;
-}
-#live-score-table tr:nth-child(2) {
-    background-color: #c0c0c0; /* Perak */
-}
-#live-score-table tr:nth-child(3) {
-    background-color: #cd7f32; /* Perunggu */
-}
+body { background-color: #f8f9fa; }
+.navbar-brand { font-weight: bold; }
+.card-header { font-weight: 500; }
+#live-score-table td { vertical-align: middle; font-size: 1.1rem; }
+#live-score-table tr:first-child { background-color: #ffd700; font-weight: bold; }
+#live-score-table tr:nth-child(2) { background-color: #c0c0c0; }
+#live-score-table tr:nth-child(3) { background-color: #cd7f32; }

@@ -1,30 +1,14 @@
 {% extends 'layout.html' %}
-
 {% block title %}Manajemen Peserta{% endblock %}
-
 {% block content %}
 <div class="d-flex justify-content-between align-items-center mb-4">
     <h1>Manajemen Peserta</h1>
     <a href="{{ url_for('admin_dashboard') }}" class="btn btn-secondary">&larr; Kembali ke Dashboard</a>
 </div>
-
-{% with messages = get_flashed_messages(with_categories=true) %}
-  {% if messages %}
-    {% for category, message in messages %}
-      <div class="alert alert-{{ category }} alert-dismissible fade show" role="alert">
-        {{ message }}
-        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-      </div>
-    {% endfor %}
-  {% endif %}
-{% endwith %}
-
 <div class="row">
     <div class="col-md-4">
         <div class="card">
-            <div class="card-header">
-                <h4>Tambah Peserta Baru</h4>
-            </div>
+            <div class="card-header"><h4>Tambah Peserta Baru</h4></div>
             <div class="card-body">
                 <form action="{{ url_for('admin_manage_peserta') }}" method="post">
                     <div class="mb-3">
@@ -35,9 +19,21 @@
                         <label for="daerah_id" class="form-label">Asal Daerah</label>
                         <select class="form-select" id="daerah_id" name="daerah_id" required>
                             <option value="">-- Pilih Daerah --</option>
-                            {% for daerah in daerah_list %}
-                            <option value="{{ daerah.id }}">{{ daerah.nama }}</option>
-                            {% endfor %}
+                            {% for daerah in daerah_list %}<option value="{{ daerah.id }}">{{ daerah.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="kategori_id" class="form-label">Kategori</label>
+                        <select class="form-select" id="kategori_id" name="kategori_id" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            {% for kategori in kategori_list %}<option value="{{ kategori.id }}">{{ kategori.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="grup_id" class="form-label">Grup</label>
+                        <select class="form-select" id="grup_id" name="grup_id" required>
+                            <option value="">-- Pilih Grup --</option>
+                            {% for grup in grup_list %}<option value="{{ grup.id }}">{{ grup.nama }}</option>{% endfor %}
                         </select>
                     </div>
                     <button type="submit" class="btn btn-primary w-100">Tambah Peserta</button>
@@ -45,22 +41,17 @@
             </div>
         </div>
     </div>
-
     <div class="col-md-8">
         <h4>Daftar Peserta</h4>
         <table class="table table-striped table-hover">
             <thead class="table-dark">
-                <tr>
-                    <th>Nama Peserta</th>
-                    <th>Asal Daerah</th>
-                    <th class="text-end">Aksi</th>
-                </tr>
+                <tr><th>Nama Peserta</th><th>Daerah</th><th>Kategori</th><th>Grup</th><th class="text-end">Aksi</th></tr>
             </thead>
             <tbody>
                 {% for peserta in peserta_list %}
                 <tr>
-                    <td>{{ peserta.nama }}</td>
-                    <td>{{ peserta.daerah.nama }}</td>
+                    <td>{{ peserta.nama }}</td><td>{{ peserta.daerah.nama }}</td>
+                    <td>{{ peserta.kategori.nama }}</td><td>{{ peserta.grup.nama }}</td>
                     <td class="text-end">
                         <form action="{{ url_for('admin_delete_peserta', peserta_id=peserta.id) }}" method="post" onsubmit="return confirm('Yakin ingin menghapus peserta ini?');">
                             <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
@@ -68,9 +59,7 @@
                     </td>
                 </tr>
                 {% else %}
-                <tr>
-                    <td colspan="3" class="text-center">Belum ada data peserta.</td>
-                </tr>
+                <tr><td colspan="5" class="text-center">Belum ada data peserta.</td></tr>
                 {% endfor %}
             </tbody>
         </table>
