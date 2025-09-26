@@ -1,0 +1,45 @@
+{% extends 'layout.html' %}
+{% block title %}📜 Riwayat Pertandingan{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+    <h1>📜 Riwayat Pertandingan</h1>
+    <p class="lead">Hasil dari sesi-sesi pertandingan yang telah selesai.</p>
+</div>
+
+{% for sesi, skor_list in riwayat.items() %}
+    <div class="card shadow-sm mb-4">
+        <div class="card-header">
+            <h4>Sesi: {{ sesi }}</h4>
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-sm table-striped">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Nama</th>
+                            <th>Daerah</th>
+                            <th>Alat</th>
+                            <th>Total</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in skor_list %}
+                        <tr>
+                            <td>{{ loop.index }}</td>
+                            <td>{{ s.peserta.nama }}</td>
+                            <td>{{ s.peserta.daerah.nama }}</td>
+                            <td>{{ s.alat.nama }}</td>
+                            <td><strong>{{ "%.3f"|format(s.total_nilai) }}</strong></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% else %}
+    <div class="alert alert-info">Belum ada riwayat pertandingan yang tersimpan.</div>
+{% endfor %}
+{% endblock %}

@@ -1,0 +1,84 @@
+{% extends 'layout.html' %}
+
+{% block title %}Input Skor Pertandingan{% endblock %}
+
+{% block content %}
+<div class="row">
+    <div class="col-lg-5">
+        <div class="card shadow-sm">
+            <div class="card-header bg-primary text-white">
+                <h4>📝 Input Nilai Pertandingan</h4>
+            </div>
+            <div class="card-body">
+                <form action="{{ url_for('input_skor') }}" method="post">
+                    <div class="mb-3">
+                        <label for="peserta" class="form-label">Nama Peserta</label>
+                        <select class="form-select" id="peserta" name="peserta" required>
+                            {% for p in data.peserta %}
+                            <option value="{{ p.id }}">{{ p.nama }} ({{ p.daerah.nama }})</option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div class="row mb-3">
+                        <div class="col-md-6"><label for="kategori" class="form-label">Kategori</label><select class="form-select" id="kategori" name="kategori">{% for k in data.kategori %}<option value="{{ k.id }}">{{ k.nama }}</option>{% endfor %}</select></div>
+                        <div class="col-md-6"><label for="grup" class="form-label">Grup</label><select class="form-select" id="grup" name="grup">{% for g in data.grup %}<option value="{{ g.id }}">{{ g.nama }}</option>{% endfor %}</select></div>
+                    </div>
+                    <div class="mb-3"><label for="alat" class="form-label">Alat</label><select class="form-select" id="alat" name="alat">{% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}</select></div>
+                    <hr>
+                    <div class="row mb-3">
+                        <div class="col-sm-4"><label for="nilai_d" class="form-label">Nilai D (Difficulty)</label><input type="number" step="0.001" class="form-control" id="nilai_d" name="nilai_d" required></div>
+                        <div class="col-sm-4"><label for="nilai_e" class="form-label">Nilai E (Execution)</label><input type="number" step="0.001" class="form-control" id="nilai_e" name="nilai_e" required></div>
+                        <div class="col-sm-4"><label for="nilai_a" class="form-label">Nilai A (Artistry)</label><input type="number" step="0.001" class="form-control" id="nilai_a" name="nilai_a"></div>
+                    </div>
+                    <div class="mb-3"><label for="penalti" class="form-label">Penalti</label><input type="number" step="0.001" class="form-control" id="penalti" name="penalti" value="0"></div>
+                    
+                    <button type="submit" class="btn btn-primary w-100">Simpan Skor</button>
+                </form>
+            </div>
+        </div>
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-danger text-white">
+                <h4>⚙️ Kontrol Pertandingan</h4>
+            </div>
+            <div class="card-body">
+                <p>Mulai pertandingan baru. Skor saat ini akan diarsipkan ke riwayat.</p>
+                <form action="{{ url_for('reset_skor') }}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin memulai sesi baru? Skor saat ini akan diarsipkan.');">
+                    <button type="submit" class="btn btn-danger w-100">Reset & Mulai Pertandingan Baru</button>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <div class="col-lg-7">
+        <h3 class="mb-3">📊 Ranking Sementara</h3>
+        <div class="table-responsive">
+            <table class="table table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th>#</th>
+                        <th>Nama</th>
+                        <th>Daerah</th>
+                        <th>Alat</th>
+                        <th>Total Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in ranking %}
+                    <tr>
+                        <td><strong>{{ loop.index }}</strong></td>
+                        <td>{{ s.peserta.nama }}</td>
+                        <td>{{ s.peserta.daerah.nama }}</td>
+                        <td>{{ s.alat.nama }}</td>
+                        <td><span class="badge bg-success fs-6">{{ "%.3f"|format(s.total_nilai) }}</span></td>
+                    </tr>
+                    {% else %}
+                    <tr>
+                        <td colspan="5" class="text-center">Belum ada skor yang diinput.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}
