@@ -54,7 +54,6 @@ class Peserta(db.Model):
 
 class Skor(db.Model):
     id = db.Column(db.Integer, primary_key=True)
-    # -- MODIFIKASI: Tambah event_id --
     event_id = db.Column(db.Integer, db.ForeignKey('event.id'), nullable=False)
     peserta_id = db.Column(db.Integer, db.ForeignKey('peserta.id'), nullable=False)
     alat_id = db.Column(db.Integer, db.ForeignKey('alat.id'), nullable=False)
@@ -63,6 +62,9 @@ class Skor(db.Model):
     nilai_a = db.Column(db.Float, nullable=False, default=0.0)
     penalti = db.Column(db.Float, nullable=False, default=0.0)
     total_nilai = db.Column(db.Float, nullable=False, default=0.0)
+
+    # --- TAMBAHKAN KEMBALI BARIS INI ---
+    sesi_pertandingan = db.Column(db.String(100), default="current")
 
     event = db.relationship('Event', backref=db.backref('skor', lazy=True, cascade="all, delete"))
     peserta = db.relationship('Peserta', backref=db.backref('skor', lazy=True, cascade="all, delete"))
@@ -99,7 +101,8 @@ def input_skor():
     kategori_ids = db.session.query(Peserta.kategori_id).filter(Peserta.event_id == active_event.id).distinct().all()
     kategori_list = Kategori.query.filter(Kategori.id.in_([k[0] for k in kategori_ids])).all()
     master_data = { 'kategori': kategori_list, 'alat': Alat.query.order_by(Alat.nama).all() }
-    ranking_sementara = Skor.query.filter_by(event_id=active_event.id).order_by(Skor.total_nilai.desc()).all()
+    # ranking_sementara = Skor.query.filter_by(event_id=active_event.id).order_by(Skor.total_nilai.desc()).all()
+    ranking_sementara = Skor.query.filter_by(event_id=active_event.id, sesi_pertandingan='current').order_by(Skor.total_nilai.desc()).all()
     return render_template('input_skor.html', data=master_data, ranking=ranking_sementara, active_event=active_event)
 
 # Tambahkan atau ganti dengan fungsi ini di app.py
@@ -140,7 +143,8 @@ def riwayat():
 def api_scores():
     active_event = get_active_event()
     if not active_event: return jsonify([])
-    skor_terkini = Skor.query.filter_by(event_id=active_event.id).order_by(Skor.total_nilai.desc()).all()
+    # skor_terkini = Skor.query.filter_by(event_id=active_event.id).order_by(Skor.total_nilai.desc()).all()
+    skor_terkini = Skor.query.filter_by(event_id=active_event.id, sesi_pertandingan='current').order_by(Skor.total_nilai.desc()).all()
     output = []
     for i, s in enumerate(skor_terkini):
         output.append({
@@ -261,6 +265,29 @@ def admin_delete_peserta(peserta_id):
 def reset_skor():
     flash('Fitur ini telah digantikan. Silakan aktifkan event baru dari Menu Admin.', 'info')
     return redirect(url_for('admin_manage_event'))
+
+# Tambahkan fungsi ini di app.py
+
+from datetime import datetime
+
+@app.route('/archive_scores', methods=['POST'])
+def archive_scores():
+    active_event = get_active_event()
+    if not active_event:
+        flash("Tidak ada event aktif.", "danger")
+        return redirect(url_for('input_skor'))
+
+    # Buat penanda unik untuk sesi yang diarsipkan
+    archive_session_name = f"arsip-{datetime.now().strftime('%Y-%m-%d %H:%M:%S')}"
+
+    # Cari semua skor yang 'current' di event aktif dan update statusnya
+    Skor.query.filter_by(event_id=active_event.id, sesi_pertandingan='current').update({
+        "sesi_pertandingan": archive_session_name
+    })
+
+    db.session.commit()
+    flash("Skor 'live' telah diarsipkan. Papan skor siap untuk kategori berikutnya.", "success")
+    return redirect(url_for('input_skor'))
     
 # --- Main execution ---
 if __name__ == '__main__':

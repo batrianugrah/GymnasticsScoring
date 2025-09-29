@@ -7,6 +7,20 @@
             <div class="card-header bg-primary text-white">
                 <h4>📝 Input Nilai Pertandingan</h4>
             </div>
+            <div class="card shadow-sm mt-4">
+            <div class="card-header bg-warning text-dark">
+                <h4>⚙️ Kontrol Ronde Pertandingan</h4>
+            </div>
+            <div class="card-body">
+                <p>Gunakan tombol ini setelah semua peserta dalam satu kategori/ronde selesai dinilai.</p>
+                <p>Ini akan mengarsipkan skor saat ini dan mengosongkan papan skor live untuk ronde berikutnya.</p>
+                <form action="{{ url_for('archive_scores') }}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengarsipkan semua skor live saat ini?');">
+                    <button type="submit" class="btn btn-warning w-100">
+                        Arsipkan Skor & Lanjutkan Kategori Berikutnya
+                    </button>
+                </form>
+            </div>
+            </div>
             <div class="card-body">
                 <form action="{{ url_for('input_skor') }}" method="post">
                     <div class="mb-3">
@@ -57,7 +71,6 @@
             </div>
         </div>
     </div>
-
     <div class="col-lg-7">
         <h3 class="mb-3">📊 Ranking Sementara</h3>
         <div class="table-responsive">

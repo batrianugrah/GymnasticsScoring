@@ -1,84 +1,95 @@
-from app import app, db, Daerah, Peserta, Kategori, Grup, Alat
-from sqlalchemy.exc import IntegrityError
+from app import app, db, Event, Daerah, Kategori, Grup, Alat, Peserta
+from datetime import date
 
-# Data Master
+# ===============================================================
+# DATA CONTOH UNTUK PENGISIAN DATABASE
+# Anda bisa mengubah atau menambah data di sini sesuai kebutuhan
+# ===============================================================
+
 DAERAH_SUMBAR = [
-    "Agam", "Dharmasraya", "Kepulauan Mentawai", "Lima Puluh Kota", "Padang Pariaman",
-    "Pasaman", "Pasaman Barat", "Pesisir Selatan", "Sijunjung", "Solok",
-    "Solok Selatan", "Tanah Datar", "Bukittinggi", "Padang", "Padang Panjang",
-    "Pariaman", "Payakumbuh", "Sawahlunto", "Solok"  # Duplikat "Solok"
+    "Agam", "Dharmasraya", "Kepulauan Mentawai", "Lima Puluh Kota", 
+    "Padang Pariaman", "Pasaman", "Pasaman Barat", "Pesisir Selatan", 
+    "Sijunjung", "Solok", "Solok Selatan", "Tanah Datar", "Bukittinggi", 
+    "Padang", "Padang Panjang", "Pariaman", "Payakumbuh", "Sawahlunto", " Kota Solok"
 ]
-KATEGORI_LIST = ["Artistik Putra", "Artistik Putri", "Ritmik", "Aerobik Gymnastic", "Senam Trampolin"]
-GRUP_LIST = ["Pra Junior", "Junior", "Senior", "NG I", "NG II", "NG III", "AG 1", "AG 2"]
+KATEGORI_LIST = ["Artistik Putra", "Artistik Putri", "Ritmik", "Aerobik Gymnastic"]
+GRUP_LIST = ["Pra Junior", "Junior", "Senior", "AG 1", "AG 2"]
 ALAT_LIST = [
-    "Free Hand", "Floor Exercise", "Vaulting Table", "Pommel Horse", "Rings", 
-    "Parallel Bars", "Horizontal Bar", "Uneven Bars", "Balance Beam",
-    "Rope", "Hoop", "Ball", "Clubs", "Ribbon"
+    "Free Hand", "Floor Exercise", "Vaulting Table", "Pommel Horse", 
+    "Rings", "Parallel Bars", "Horizontal Bar", "Uneven Bars", 
+    "Balance Beam", "Rope", "Hoop", "Ball", "Clubs", "Ribbon"
 ]
-# PESERTA_CONTOH = [
-#     {"nama": "Budi Santoso", "daerah": "Padang"},
-#     {"nama": "Citra Lestari", "daerah": "Bukittinggi"},
-#     {"nama": "Doni Firmansyah", "daerah": "Payakumbuh"},
-#     {"nama": "Eka Putri", "daerah": "Solok"},
-# ]
 
-def insert_unique(model, nama):
-    """Insert data only if it doesn't already exist."""
-    if not db.session.query(model).filter_by(nama=nama).first():
-        db.session.add(model(nama=nama))
+# Data Contoh Event
+EVENTS_CONTOH = [
+    {'nama': 'Pekan Olahraga Provinsi (PORPROV) 2025', 'tanggal': date(2025, 11, 10)},
+    {'nama': 'Kejuaraan Daerah Junior 2025', 'tanggal': date(2025, 7, 22)},
+]
 
-def insert_master_data():
-    print("🗂️ Memasukkan data master...")
-
-    for nama_daerah in set(DAERAH_SUMBAR):  # Hindari duplikat
-        insert_unique(Daerah, nama_daerah)
-
-    for nama_kategori in KATEGORI_LIST:
-        insert_unique(Kategori, nama_kategori)
-
-    for nama_grup in GRUP_LIST:
-        insert_unique(Grup, nama_grup)
-
-    for nama_alat in ALAT_LIST:
-        insert_unique(Alat, nama_alat)
-
-    try:
-        db.session.commit()
-        print("✅ Data master berhasil dimasukkan.")
-    except IntegrityError as e:
-        db.session.rollback()
-        print("❌ Gagal memasukkan data master:", e)
-
-# def insert_peserta_data():
-#     print("👥 Memasukkan data peserta...")
-
-#     for p in PESERTA_CONTOH:
-#         daerah_obj = Daerah.query.filter_by(nama=p['daerah']).first()
-#         if daerah_obj:
-#             if not db.session.query(Peserta).filter_by(nama=p['nama'], daerah_id=daerah_obj.id).first():
-#                 db.session.add(Peserta(nama=p['nama'], daerah_id=daerah_obj.id))
-#         else:
-#             print(f"⚠️ Daerah '{p['daerah']}' tidak ditemukan untuk peserta '{p['nama']}'.")
-
-#     try:
-#         db.session.commit()
-#         print("✅ Data peserta berhasil dimasukkan.")
-#     except IntegrityError as e:
-#         db.session.rollback()
-#         print("❌ Gagal memasukkan data peserta:", e)
+# Data Contoh Peserta yang sudah terhubung ke Event, Kategori, dan Grup
+PESERTA_CONTOH = [
+    # Peserta untuk PORPROV 2025
+    {"nama": "Budi Santoso", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Padang", "kategori": "Artistik Putra", "grup": "Senior"},
+    {"nama": "Andi Wijaya", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Padang", "kategori": "Artistik Putra", "grup": "Senior"},
+    {"nama": "Citra Lestari", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Bukittinggi", "kategori": "Artistik Putri", "grup": "Senior"},
+    {"nama": "Dewi Anggraini", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Payakumbuh", "kategori": "Ritmik", "grup": "Senior"},
+    
+    # Peserta untuk Kejuaraan Daerah Junior 2025
+    {"nama": "Rian Pratama", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Solok", "kategori": "Artistik Putra", "grup": "Junior"},
+    {"nama": "Fitriani", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Pariaman", "kategori": "Ritmik", "grup": "Junior"},
+    {"nama": "Sari Indah", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Agam", "kategori": "Ritmik", "grup": "Junior"},
+]
 
 def setup_database():
     with app.app_context():
-        print("🔄 Menginisialisasi ulang basis data...")
+        # Hapus semua tabel yang ada dan buat kembali dari awal
+        print("Menghapus database lama...")
         db.drop_all()
+        print("Membuat skema database baru...")
         db.create_all()
 
-        insert_master_data()
-        # insert_peserta_data()
+        # --- Pengisian Data Master Independen ---
+        print("Memasukkan data master (Daerah, Kategori, Grup, Alat, Event)...")
+        for nama_daerah in DAERAH_SUMBAR: db.session.add(Daerah(nama=nama_daerah))
+        for nama_kategori in KATEGORI_LIST: db.session.add(Kategori(nama=nama_kategori))
+        for nama_grup in GRUP_LIST: db.session.add(Grup(nama=nama_grup))
+        for nama_alat in ALAT_LIST: db.session.add(Alat(nama=nama_alat))
+        for event in EVENTS_CONTOH: db.session.add(Event(nama=event['nama'], tanggal=event['tanggal']))
+        
+        # Commit agar data master punya ID sebelum membuat data Peserta
+        db.session.commit()
+        print("Data master berhasil dimasukkan.")
 
+        # --- Pengisian Data Peserta (Dependen) ---
+        print("Memasukkan data peserta contoh...")
+        for p_data in PESERTA_CONTOH:
+            # Cari objek dari nama untuk mendapatkan ID-nya
+            event_obj = Event.query.filter_by(nama=p_data['event']).first()
+            daerah_obj = Daerah.query.filter_by(nama=p_data['daerah']).first()
+            kategori_obj = Kategori.query.filter_by(nama=p_data['kategori']).first()
+            grup_obj = Grup.query.filter_by(nama=p_data['grup']).first()
+
+            if all([event_obj, daerah_obj, kategori_obj, grup_obj]):
+                peserta_baru = Peserta(
+                    nama=p_data['nama'],
+                    event_id=event_obj.id,
+                    daerah_id=daerah_obj.id,
+                    kategori_id=kategori_obj.id,
+                    grup_id=grup_obj.id
+                )
+                db.session.add(peserta_baru)
+            else:
+                print(f"WARNING: Gagal menambahkan peserta '{p_data['nama']}' karena salah satu data master tidak ditemukan.")
+        
+        # Commit data peserta
+        db.session.commit()
+        print("Data peserta berhasil dimasukkan.")
+
+        print("\n" + "="*30)
+        print("✅ SETUP BASIS DATA SELESAI ✅")
         print("="*30)
-        print("🎉 Setup basis data selesai!")
-        print("="*30)
+        print("Langkah selanjutnya: Jalankan 'python app.py', buka Menu Admin,")
+        print("lalu aktifkan salah satu event untuk memulai.")
 
 if __name__ == '__main__':
     setup_database()
