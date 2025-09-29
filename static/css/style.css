@@ -5,3 +5,16 @@ body { background-color: #f8f9fa; }
 #live-score-table tr:first-child { background-color: #ffd700; font-weight: bold; }
 #live-score-table tr:nth-child(2) { background-color: #c0c0c0; }
 #live-score-table tr:nth-child(3) { background-color: #cd7f32; }
+
+/* Style untuk link nama peserta agar tidak tampak seperti link biasa */
+a.participant-link {
+    color: inherit; /* Mengambil warna teks normal (biasanya hitam atau gelap) */
+    text-decoration: none; /* Menghilangkan garis bawah default */
+    font-weight: 500; /* (Opsional) Sedikit menebalkan nama */
+}
+
+/* Efek saat mouse diarahkan ke nama peserta */
+a.participant-link:hover {
+    text-decoration: underline; /* Tampilkan garis bawah saat di-hover */
+    color: #0d6efd; /* (Opsional) Ubah warna menjadi biru saat di-hover */
+}

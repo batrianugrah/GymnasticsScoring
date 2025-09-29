@@ -1,0 +1,52 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Peringkat Detail - {{ event.nama if event else 'Tidak Ada Event' }}
+{% endblock %}
+
+{% block content %}
+<div class="mb-4 text-center">
+    <h1>Peringkat Detail Pertandingan</h1>
+    {% if event %}
+    <p class="lead">Hasil berdasarkan Kategori, Grup, dan Alat untuk event: <strong>{{ event.nama }}</strong></p>
+    {% endif %}
+</div>
+
+{% for key, scores in peringkat_data.items() | sort %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header bg-light">
+        <h4 class="mb-0">{{ key }}</h4>
+    </div>
+    <div class="card-body">
+        <div class="table-responsive">
+            <table class="table table-sm table-striped table-hover">
+                <thead class="table-dark">
+                    <tr>
+                        <th style="width: 5%;">#</th>
+                        <th>Nama Peserta</th>
+                        <th>Asal Daerah</th>
+                        <th style="width: 15%;">Total Nilai</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for skor in scores %}
+                    <tr>
+                        <td><strong>{{ loop.index }}</strong></td>
+                        <td>
+                            <a href="{{ url_for('profil_peserta', peserta_id=skor.peserta.id) }}" class="participant-link">
+                                    {{ skor.peserta.nama }}
+                            </a>
+                        </td>
+                        <td>{{ skor.peserta.daerah.nama }}</td>
+                        <td><span class="badge bg-primary fs-6">{{ "%.3f"|format(skor.total_nilai) }}</span></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% else %}
+    <div class="alert alert-info">Belum ada skor yang tercatat untuk event ini.</div>
+{% endfor %}
+{% endblock %}

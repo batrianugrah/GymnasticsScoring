@@ -1,0 +1,57 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Profil: {{ peserta.nama }}
+{% endblock %}
+
+{% block content %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header">
+        <h1 class="mb-0">Profil Atlet: {{ peserta.nama }}</h1>
+    </div>
+    <div class="card-body">
+        <p class="fs-5">
+            <strong>Asal Daerah:</strong> {{ peserta.daerah.nama }} <br>
+            <strong>Kategori:</strong> {{ peserta.kategori.nama }} <br>
+            <strong>Grup:</strong> {{ peserta.grup.nama }} <br>
+            <strong>Event Terdaftar:</strong> {{ peserta.event.nama }}
+        </p>
+    </div>
+</div>
+
+<h3 class="mt-4">Riwayat Skor Pertandingan</h3>
+<div class="table-responsive">
+    <table class="table table-striped table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>Event</th>
+                <th>Alat</th>
+                <th>Nilai D</th>
+                <th>Nilai E</th>
+                <th>Nilai A</th>
+                <th>Penalti</th>
+                <th>Total</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for skor in skor_list %}
+            <tr>
+                <td>{{ skor.event.nama }}</td>
+                <td>{{ skor.alat.nama }}</td>
+                <td>{{ "%.3f"|format(skor.nilai_d) }}</td>
+                <td>{{ "%.3f"|format(skor.nilai_e) }}</td>
+                <td>{{ "%.3f"|format(skor.nilai_a) }}</td>
+                <td>{{ "%.3f"|format(skor.penalti) }}</td>
+                <td><strong>{{ "%.3f"|format(skor.total_nilai) }}</strong></td>
+            </tr>
+            {% else %}
+            <tr><td colspan="7" class="text-center">Atlet ini belum memiliki catatan skor.</td></tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+
+<div class="mt-4">
+    <a href="javascript:history.back()" class="btn btn-secondary">&larr; Kembali</a>
+</div>
+{% endblock %}

@@ -31,12 +31,21 @@ PESERTA_CONTOH = [
     # Peserta untuk PORPROV 2025
     {"nama": "Budi Santoso", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Padang", "kategori": "Artistik Putra", "grup": "Senior"},
     {"nama": "Andi Wijaya", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Padang", "kategori": "Artistik Putra", "grup": "Senior"},
+    {"nama": "P2", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Agam", "kategori": "Artistik Putra", "grup": "Senior"},
+    {"nama": "P3", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Bukittinggi", "kategori": "Artistik Putra", "grup": "Senior"},
     {"nama": "Citra Lestari", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Bukittinggi", "kategori": "Artistik Putri", "grup": "Senior"},
+    {"nama": "Citra Lestari2", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Padang", "kategori": "Artistik Putri", "grup": "Senior"},
+    {"nama": "Citra Lestari3", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Agam", "kategori": "Artistik Putri", "grup": "Senior"},
     {"nama": "Dewi Anggraini", "event": "Pekan Olahraga Provinsi (PORPROV) 2025", "daerah": "Payakumbuh", "kategori": "Ritmik", "grup": "Senior"},
     
     # Peserta untuk Kejuaraan Daerah Junior 2025
     {"nama": "Rian Pratama", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Solok", "kategori": "Artistik Putra", "grup": "Junior"},
+    {"nama": "Rian Pratama2", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Padang", "kategori": "Artistik Putra", "grup": "Junior"},
+    {"nama": "Rian Pratama3", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Agam", "kategori": "Artistik Putra", "grup": "Junior"},
+    {"nama": "Rian Pratama4", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Payakumbuh", "kategori": "Artistik Putra", "grup": "Junior"},
     {"nama": "Fitriani", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Pariaman", "kategori": "Ritmik", "grup": "Junior"},
+    {"nama": "Fitriani2", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Padang", "kategori": "Ritmik", "grup": "Junior"},
+    {"nama": "Fitriani3", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Bukittinggi", "kategori": "Ritmik", "grup": "Junior"},
     {"nama": "Sari Indah", "event": "Kejuaraan Daerah Junior 2025", "daerah": "Agam", "kategori": "Ritmik", "grup": "Junior"},
 ]
 

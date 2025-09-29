@@ -1,42 +1,44 @@
 {% extends 'layout.html' %}
-{% block title %}📜 Riwayat Pertandingan{% endblock %}
+
+{% block title %}
+    Riwayat Pertandingan
+{% endblock %}
 
 {% block content %}
-{% for event, scores in riwayat.items() %}
-<!-- <div class="card shadow-sm mb-4">
-    <div class="card-header"><h4>{{ event.nama }} <small>({{ event.tanggal.strftime('%d %b %Y') }})</small></h4></div>
-    <div class="card-body">
-    </div>
-</div> -->
-{% else %}
-    <div class="alert alert-info">Belum ada riwayat pertandingan.</div>
-{% endfor %}
+<div class="mb-4">
+    <h1>📜 Riwayat Pertandingan</h1>
+    <p class="lead">Hasil dari event-event pertandingan yang telah selesai atau diarsipkan.</p>
+</div>
 
-{% for sesi, skor_list in riwayat.items() %}
+{% for event, scores in riwayat.items() %}
     <div class="card shadow-sm mb-4">
-        <div class="card-header">
-            <h4 class="text-muted">{{ skor_list[0].event.nama }} - {{ skor_list[0].event.tanggal.strftime('%d %B %Y') }}</h4>
+        <div class="card-header bg-light">
+            <h4 class="mb-0">{{ event.nama }} <small class="text-muted">({{ event.tanggal.strftime('%d %B %Y') }})</small></h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">
-                <table class="table table-sm table-striped">
-                    <thead>
+                <table class="table table-sm table-striped table-hover">
+                    <thead class="table-dark">
                         <tr>
-                            <th>#</th>
-                            <th>Nama</th>
+                            <th style="width: 5%;">#</th>
+                            <th>Nama Peserta</th>
                             <th>Daerah</th>
                             <th>Alat</th>
-                            <th>Total</th>
+                            <th style="width: 15%;">Total Nilai</th>
                         </tr>
                     </thead>
                     <tbody>
-                        {% for s in skor_list %}
+                        {% for skor in scores %}
                         <tr>
-                            <td>{{ loop.index }}</td>
-                            <td>{{ s.peserta.nama }}</td>
-                            <td>{{ s.peserta.daerah.nama }}</td>
-                            <td>{{ s.alat.nama }}</td>
-                            <td><strong>{{ "%.3f"|format(s.total_nilai) }}</strong></td>
+                            <td><strong>{{ loop.index }}</strong></td>
+                            <td>
+                                <a href="{{ url_for('profil_peserta', peserta_id=skor.peserta.id) }}" class="participant-link">
+                                    {{ skor.peserta.nama }}
+                                </a>
+                            </td>
+                            <td>{{ skor.peserta.daerah.nama }}</td>
+                            <td>{{ skor.alat.nama }}</td>
+                            <td><span class="badge bg-secondary">{{ "%.3f"|format(skor.total_nilai) }}</span></td>
                         </tr>
                         {% endfor %}
                     </tbody>

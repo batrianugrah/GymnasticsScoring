@@ -138,6 +138,44 @@ def riwayat():
     riwayat_skor = {event: Skor.query.filter_by(event_id=event.id).order_by(Skor.total_nilai.desc()).all() for event in events if Skor.query.filter_by(event_id=event.id).first()}
     return render_template('riwayat.html', riwayat=riwayat_skor)
 
+# Tambahkan dua fungsi ini di app.py
+
+@app.route('/peringkat')
+def peringkat():
+    active_event = get_active_event()
+    if not active_event:
+        # Jika tidak ada event aktif, arahkan ke halaman utama yang akan menampilkan pesan
+        return redirect(url_for('input_skor'))
+
+    # Ambil semua skor untuk event yang aktif
+    all_scores = Skor.query.filter_by(event_id=active_event.id).join(Peserta).join(Alat).all()
+
+    # Logika untuk mengelompokkan skor
+    peringkat_data = {}
+    for skor in all_scores:
+        # Buat kunci unik berdasarkan kombinasi Kategori, Grup, dan Alat
+        key = f"{skor.peserta.kategori.nama} - {skor.peserta.grup.nama} - {skor.alat.nama}"
+        
+        if key not in peringkat_data:
+            peringkat_data[key] = []
+        
+        peringkat_data[key].append(skor)
+
+    # Urutkan skor di dalam setiap grup dari yang tertinggi ke terendah
+    for key in peringkat_data:
+        peringkat_data[key] = sorted(peringkat_data[key], key=lambda x: x.total_nilai, reverse=True)
+
+    return render_template('peringkat.html', peringkat_data=peringkat_data, event=active_event)
+
+@app.route('/peserta/<int:peserta_id>')
+def profil_peserta(peserta_id):
+    peserta = Peserta.query.get_or_404(peserta_id)
+    # Ambil semua skor milik peserta ini dari semua event, diurutkan dari event terbaru
+    skor_peserta = Skor.query.filter_by(peserta_id=peserta.id)\
+        .join(Event).order_by(Event.tanggal.desc()).all()
+    
+    return render_template('profil_peserta.html', peserta=peserta, skor_list=skor_peserta)
+
 # --- API Endpoints ---
 @app.route('/api/scores')
 def api_scores():

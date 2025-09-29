@@ -7,20 +7,7 @@
             <div class="card-header bg-primary text-white">
                 <h4>📝 Input Nilai Pertandingan</h4>
             </div>
-            <div class="card shadow-sm mt-4">
-            <div class="card-header bg-warning text-dark">
-                <h4>⚙️ Kontrol Ronde Pertandingan</h4>
-            </div>
-            <div class="card-body">
-                <p>Gunakan tombol ini setelah semua peserta dalam satu kategori/ronde selesai dinilai.</p>
-                <p>Ini akan mengarsipkan skor saat ini dan mengosongkan papan skor live untuk ronde berikutnya.</p>
-                <form action="{{ url_for('archive_scores') }}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengarsipkan semua skor live saat ini?');">
-                    <button type="submit" class="btn btn-warning w-100">
-                        Arsipkan Skor & Lanjutkan Kategori Berikutnya
-                    </button>
-                </form>
-            </div>
-            </div>
+            
             <div class="card-body">
                 <form action="{{ url_for('input_skor') }}" method="post">
                     <div class="mb-3">
@@ -62,6 +49,20 @@
             </div>
         </div>
         <div class="card shadow-sm mt-4">
+            <div class="card shadow-sm mt-4">
+                <div class="card-header bg-warning text-dark">
+                    <h4>⚙️ Kontrol Ronde Pertandingan</h4>
+                </div>
+                <div class="card-body">
+                    <p>Gunakan tombol ini setelah semua peserta dalam satu kategori/ronde selesai dinilai.</p>
+                    <p>Ini akan mengarsipkan skor saat ini dan mengosongkan papan skor live untuk ronde berikutnya.</p>
+                    <form action="{{ url_for('archive_scores') }}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengarsipkan semua skor live saat ini?');">
+                        <button type="submit" class="btn btn-warning w-100">
+                            Arsipkan Skor & Lanjutkan Kategori Berikutnya
+                        </button>
+                    </form>
+                </div>
+            </div>
              <div class="card-header bg-danger text-white"><h4>⚙️ Kontrol Pertandingan</h4></div>
              <div class="card-body">
                 <p>Mulai pertandingan baru. Skor saat ini akan diarsipkan ke riwayat.</p>
@@ -88,7 +89,8 @@
                     {% for s in ranking %}
                     <tr>
                         <td><strong>{{ loop.index }}</strong></td>
-                        <td>{{ s.peserta.nama }} <small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td>
+                        <!-- <td>{{ s.peserta.nama }} <small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td> -->
+                        <td><a href="{{ url_for('profil_peserta', peserta_id=s.peserta.id) }}" class="participant-link">{{ s.peserta.nama }}</a> <small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td>
                         <td>{{ s.alat.nama }}</td>
                         <td><span class="badge bg-success fs-6">{{ "%.3f"|format(s.total_nilai) }}</span></td>
                         <td>
