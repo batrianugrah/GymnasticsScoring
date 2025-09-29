@@ -3,11 +3,11 @@
 
 {% block content %}
 {% for event, scores in riwayat.items() %}
-<div class="card shadow-sm mb-4">
+<!-- <div class="card shadow-sm mb-4">
     <div class="card-header"><h4>{{ event.nama }} <small>({{ event.tanggal.strftime('%d %b %Y') }})</small></h4></div>
     <div class="card-body">
-        </div>
-</div>
+    </div>
+</div> -->
 {% else %}
     <div class="alert alert-info">Belum ada riwayat pertandingan.</div>
 {% endfor %}
@@ -15,7 +15,7 @@
 {% for sesi, skor_list in riwayat.items() %}
     <div class="card shadow-sm mb-4">
         <div class="card-header">
-            <h4>Sesi: {{ sesi }}</h4>
+            <h4 class="text-muted">{{ skor_list[0].event.nama }} - {{ skor_list[0].event.tanggal.strftime('%d %B %Y') }}</h4>
         </div>
         <div class="card-body">
             <div class="table-responsive">
