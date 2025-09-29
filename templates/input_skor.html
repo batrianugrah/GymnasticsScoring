@@ -24,18 +24,31 @@
                         </select>
                     </div>
                     <div class="mb-3">
-                        <label for="peserta" class="form-label">3. Pilih Peserta</label>
-                        <select class="form-select" id="peserta" name="peserta" required>
-                             <option value="">-- Menunggu Grup Dipilih --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="alat" class="form-label">4. Pilih Alat</label>
+                        <label for="alat" class="form-label">3. Pilih Alat</label>
                         <select class="form-select" id="alat" name="alat" required>
                             <option value="">-- Pilih Alat --</option>
                             {% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label for="peserta" class="form-label">4. Pilih Peserta</label>
+                        <select class="form-select" id="peserta" name="peserta" required>
+                            <option value="">-- Menunggu Kategori, Grup, & Alat Dipilih --</option>
+                        </select>
+                    </div>
+                    <!-- <div class="mb-3">
+                        <label for="peserta" class="form-label">3. Pilih Peserta</label>
+                        <select class="form-select" id="peserta" name="peserta" required>
+                             <option value="">-- Menunggu Grup Dipilih --</option>
+                        </select>
+                    </div> -->
+                    <!-- <div class="mb-3">
+                        <label for="alat" class="form-label">4. Pilih Alat</label>
+                        <select class="form-select" id="alat" name="alat" required>
+                            <option value="">-- Pilih Alat --</option>
+                            {% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}
+                        </select>
+                    </div> -->
                     <hr>
                     <div class="row mb-3">
                         <div class="col-sm-4"><label for="nilai_d" class="form-label">Nilai D</label><input type="number" step="0.001" class="form-control" name="nilai_d" required></div>
@@ -112,16 +125,55 @@
 document.addEventListener('DOMContentLoaded', function() {
     const kategoriSelect = document.getElementById('kategori');
     const grupSelect = document.getElementById('grup');
+    const alatSelect = document.getElementById('alat');
     const pesertaSelect = document.getElementById('peserta');
 
     function resetSelect(select, message) {
         select.innerHTML = `<option value="">${message}</option>`;
     }
 
+    async function fetchPeserta() {
+        const kategoriId = kategoriSelect.value;
+        const grupId = grupSelect.value;
+        const alatId = alatSelect.value;
+
+        resetSelect(pesertaSelect, '-- Memuat Peserta... --');
+
+        if (!kategoriId || !grupId || !alatId) {
+            resetSelect(pesertaSelect, '-- Menunggu Kategori, Grup, & Alat Dipilih --');
+            return;
+        }
+
+        try {
+            const response = await fetch(`/api/peserta_by_grup_alat/${kategoriId}/${grupId}/${alatId}`);
+            if (!response.ok) throw new Error('Gagal mengambil data dari server');
+            
+            const pesertas = await response.json();
+
+            if (pesertas.length > 0) {
+                let options = '<option value="">-- Pilih Peserta --</option>';
+                pesertas.forEach(peserta => {
+                    const text = `${peserta.nama} (${peserta.daerah})`;
+                    const isDisabled = peserta.scored;
+                    const suffix = isDisabled ? ' (Sudah dinilai ✓)' : '';
+                    const disabledAttr = isDisabled ? 'disabled' : '';
+                    
+                    options += `<option value="${peserta.id}" ${disabledAttr}>${text}${suffix}</option>`;
+                });
+                pesertaSelect.innerHTML = options;
+            } else {
+                resetSelect(pesertaSelect, '-- Tidak ada Peserta yang cocok --');
+            }
+        } catch (error) {
+            console.error('Error fetching participants:', error);
+            resetSelect(pesertaSelect, '-- Gagal Memuat Data --');
+        }
+    }
+
     kategoriSelect.addEventListener('change', async function() {
         const kategoriId = this.value;
         resetSelect(grupSelect, '-- Memuat Grup... --');
-        resetSelect(pesertaSelect, '-- Menunggu Grup Dipilih --');
+        resetSelect(pesertaSelect, '-- Menunggu Grup & Alat Dipilih --');
 
         if (!kategoriId) {
             resetSelect(grupSelect, '-- Menunggu Kategori Dipilih --');
@@ -148,35 +200,8 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     });
 
-    grupSelect.addEventListener('change', async function() {
-        const grupId = this.value;
-        const kategoriId = kategoriSelect.value;
-        resetSelect(pesertaSelect, '-- Memuat Peserta... --');
-
-        if (!grupId || !kategoriId) {
-            resetSelect(pesertaSelect, '-- Menunggu Grup Dipilih --');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/peserta_by_grup/${kategoriId}/${grupId}`);
-            if (!response.ok) throw new Error('Gagal mengambil data dari server');
-            const pesertas = await response.json();
-
-            if (pesertas.length > 0) {
-                let options = '<option value="">-- Pilih Peserta --</option>';
-                pesertas.forEach(peserta => {
-                    options += `<option value="${peserta.id}">${peserta.nama} (${peserta.daerah})</option>`;
-                });
-                pesertaSelect.innerHTML = options;
-            } else {
-                resetSelect(pesertaSelect, '-- Tidak ada Peserta di Grup ini --');
-            }
-        } catch (error) {
-            console.error('Error fetching participants:', error);
-            resetSelect(pesertaSelect, '-- Gagal Memuat Data --');
-        }
-    });
+    grupSelect.addEventListener('change', fetchPeserta);
+    alatSelect.addEventListener('change', fetchPeserta);
 });
 </script>
 {% endblock %}

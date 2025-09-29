@@ -203,12 +203,39 @@ def api_grup_by_kategori(kategori_id):
     grups = Grup.query.filter(Grup.id.in_(grup_ids)).order_by(Grup.nama).all()
     return jsonify([{'id': g.id, 'nama': g.nama} for g in grups])
 
-@app.route('/api/peserta_by_grup/<int:kategori_id>/<int:grup_id>')
-def api_peserta_by_grup(kategori_id, grup_id):
+@app.route('/api/peserta_by_grup_alat/<int:kategori_id>/<int:grup_id>/<int:alat_id>')
+def api_peserta_by_grup_alat(kategori_id, grup_id, alat_id):
     active_event = get_active_event()
-    if not active_event: return jsonify([])
-    pesertas = Peserta.query.filter_by(event_id=active_event.id, kategori_id=kategori_id, grup_id=grup_id).order_by(Peserta.nama).all()
-    return jsonify([{'id': p.id, 'nama': p.nama, 'daerah': p.daerah.nama} for p in pesertas])
+    if not active_event:
+        return jsonify([])
+
+    # 1. Ambil semua peserta yang cocok dengan event, kategori, dan grup
+    pesertas_in_grup = Peserta.query.filter_by(
+        event_id=active_event.id, 
+        kategori_id=kategori_id, 
+        grup_id=grup_id
+    ).all()
+
+    # 2. Ambil ID semua peserta yang SUDAH dinilai untuk ALAT SPESIFIK ini di event ini
+    scored_peserta_ids = {
+        skor.peserta_id for skor in Skor.query.filter_by(
+            event_id=active_event.id, 
+            alat_id=alat_id,
+            sesi_pertandingan='current'
+        ).all()
+    }
+
+    # 3. Buat response JSON, tambahkan properti 'scored'
+    peserta_array = []
+    for p in pesertas_in_grup:
+        peserta_array.append({
+            'id': p.id, 
+            'nama': p.nama, 
+            'daerah': p.daerah.nama,
+            'scored': p.id in scored_peserta_ids  # True jika sudah dinilai, False jika belum
+        })
+
+    return jsonify(sorted(peserta_array, key=lambda x: x['nama']))
 
 
 # --- Area Admin ---
