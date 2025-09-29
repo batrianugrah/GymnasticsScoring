@@ -55,11 +55,28 @@
                 <tr><th>Nama Peserta</th><th>Daerah</th><th>Kategori</th><th>Grup</th><th class="text-end">Aksi</th></tr>
             </thead>
             <tbody>
-                {% for peserta in peserta_list %}
+                <!-- {% for peserta in peserta_list %}
                 <tr>
                     <td>{{ peserta.nama }}</td><td>{{ peserta.daerah.nama }}</td>
                     <td>{{ peserta.kategori.nama }}</td><td>{{ peserta.grup.nama }}</td>
                     <td class="text-end">
+                        <form action="{{ url_for('admin_delete_peserta', peserta_id=peserta.id) }}" method="post" onsubmit="return confirm('Yakin ingin menghapus peserta ini?');">
+                            <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
+                        </form>
+                    </td>
+                </tr>
+                {% else %}
+                <tr><td colspan="5" class="text-center">Belum ada data peserta.</td></tr>
+                {% endfor %} -->
+                {% for peserta in peserta_list %}
+                <tr>
+                    <td>{{ peserta.nama }}</td>
+                    <td>{{ peserta.daerah.nama }}</td>
+                    <td>{{ peserta.kategori.nama }}</td>
+                    <td>{{ peserta.grup.nama }}</td>
+                    <td class="text-end d-flex gap-1 justify-content-end">
+                        <a href="{{ url_for('admin_edit_peserta', peserta_id=peserta.id) }}" class="btn btn-sm btn-warning">Edit</a>
+                        
                         <form action="{{ url_for('admin_delete_peserta', peserta_id=peserta.id) }}" method="post" onsubmit="return confirm('Yakin ingin menghapus peserta ini?');">
                             <button type="submit" class="btn btn-sm btn-danger">Hapus</button>
                         </form>

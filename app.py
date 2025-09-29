@@ -293,6 +293,40 @@ def admin_manage_peserta():
         kategori_list=Kategori.query.order_by(Kategori.nama).all(), 
         grup_list=Grup.query.order_by(Grup.nama).all(),
         event_list=Event.query.order_by(Event.nama).all()) # Kirim list event
+
+# Tambahkan fungsi ini di app.py
+
+@app.route('/admin/edit/peserta/<int:peserta_id>', methods=['GET', 'POST'])
+def admin_edit_peserta(peserta_id):
+    peserta_to_edit = Peserta.query.get_or_404(peserta_id)
+    
+    if request.method == 'POST':
+        # Ambil data baru dari form
+        peserta_to_edit.nama = request.form.get('nama')
+        peserta_to_edit.daerah_id = request.form.get('daerah_id')
+        peserta_to_edit.kategori_id = request.form.get('kategori_id')
+        peserta_to_edit.grup_id = request.form.get('grup_id')
+        peserta_to_edit.event_id = request.form.get('event_id')
+        
+        db.session.commit()
+        flash(f"Data peserta '{peserta_to_edit.nama}' berhasil diperbarui.", "success")
+        return redirect(url_for('admin_manage_peserta'))
+
+    # Saat GET request, kirim data master untuk mengisi dropdown
+    daerah_list = Daerah.query.order_by(Daerah.nama).all()
+    kategori_list = Kategori.query.order_by(Kategori.nama).all()
+    grup_list = Grup.query.order_by(Grup.nama).all()
+    event_list = Event.query.order_by(Event.nama).all()
+    
+    return render_template(
+        'admin_edit_peserta.html', 
+        peserta=peserta_to_edit,
+        daerah_list=daerah_list,
+        kategori_list=kategori_list,
+        grup_list=grup_list,
+        event_list=event_list
+    )
+
 @app.route('/admin/delete/peserta/<int:peserta_id>', methods=['POST'])
 def admin_delete_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id); db.session.delete(peserta); db.session.commit()

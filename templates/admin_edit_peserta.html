@@ -1,0 +1,74 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Edit Peserta: {{ peserta.nama }}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0">✏️ Edit Data Peserta</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Lengkap Peserta</label>
+                        <input type="text" class="form-control" id="nama" name="nama" value="{{ peserta.nama }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="daerah_id" class="form-label">Asal Daerah</label>
+                        <select class="form-select" id="daerah_id" name="daerah_id" required>
+                            {% for daerah in daerah_list %}
+                            <option value="{{ daerah.id }}" {% if daerah.id == peserta.daerah_id %}selected{% endif %}>
+                                {{ daerah.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="kategori_id" class="form-label">Kategori</label>
+                        <select class="form-select" id="kategori_id" name="kategori_id" required>
+                            {% for kategori in kategori_list %}
+                            <option value="{{ kategori.id }}" {% if kategori.id == peserta.kategori_id %}selected{% endif %}>
+                                {{ kategori.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="grup_id" class="form-label">Grup</label>
+                        <select class="form-select" id="grup_id" name="grup_id" required>
+                            {% for grup in grup_list %}
+                            <option value="{{ grup.id }}" {% if grup.id == peserta.grup_id %}selected{% endif %}>
+                                {{ grup.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="event_id" class="form-label">Event Pertandingan</label>
+                        <select class="form-select" id="event_id" name="event_id" required>
+                            {% for event in event_list %}
+                            <option value="{{ event.id }}" {% if event.id == peserta.event_id %}selected{% endif %}>
+                                {{ event.nama }}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('admin_manage_peserta') }}" class="btn btn-secondary">Batal</a>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
