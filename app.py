@@ -279,20 +279,47 @@ def admin_delete_generic(master_type, item_id):
 @app.route('/admin/manage/peserta', methods=['GET', 'POST'])
 def admin_manage_peserta():
     if request.method == 'POST':
+        # Bagian ini untuk menambahkan peserta baru (tidak berubah)
         nama = request.form.get('nama'); daerah_id = request.form.get('daerah_id')
         kategori_id = request.form.get('kategori_id'); grup_id = request.form.get('grup_id')
-        event_id = request.form.get('event_id') # Tambahan
+        event_id = request.form.get('event_id')
         if all([nama, daerah_id, kategori_id, grup_id, event_id]):
             db.session.add(Peserta(nama=nama, daerah_id=daerah_id, kategori_id=kategori_id, grup_id=grup_id, event_id=event_id))
             db.session.commit(); flash(f"Peserta '{nama}' berhasil ditambahkan.", "success")
         else: flash("Semua field wajib diisi.", "danger")
         return redirect(url_for('admin_manage_peserta'))
+
+    # --- LOGIKA SORTING & PAGINATION BARU ---
+    sort_by = request.args.get('sort_by', 'nama')
+    page = request.args.get('page', 1, type=int) # Ambil nomor halaman dari URL
+
+    query = Peserta.query
+    if sort_by == 'daerah':
+        query = query.join(Daerah).order_by(Daerah.nama)
+    elif sort_by == 'kategori':
+        query = query.join(Kategori).order_by(Kategori.nama)
+    elif sort_by == 'grup':
+        query = query.join(Grup).order_by(Grup.nama)
+    elif sort_by == 'event':
+        query = query.join(Event).order_by(Event.nama)
+    else:
+        query = query.order_by(Peserta.nama)
+
+    # Ganti .all() dengan .paginate()
+    # Menampilkan 15 peserta per halaman
+    pagination = query.paginate(page=page, per_page=15, error_out=False)
+    peserta_list = pagination.items
+    # --- AKHIR LOGIKA SORTING & PAGINATION ---
+    
     return render_template('admin_manage_peserta.html', 
-        peserta_list=Peserta.query.order_by(Peserta.nama).all(), 
+        peserta_list=peserta_list, 
+        pagination=pagination, # Kirim objek pagination ke template
         daerah_list=Daerah.query.order_by(Daerah.nama).all(),
         kategori_list=Kategori.query.order_by(Kategori.nama).all(), 
         grup_list=Grup.query.order_by(Grup.nama).all(),
-        event_list=Event.query.order_by(Event.nama).all()) # Kirim list event
+        event_list=Event.query.order_by(Event.nama).all(),
+        current_sort=sort_by
+    )
 
 # Tambahkan fungsi ini di app.py
 
