@@ -36,6 +36,13 @@
                             {% for grup in grup_list %}<option value="{{ grup.id }}">{{ grup.nama }}</option>{% endfor %}
                         </select>
                     </div>
+                    <div class="mb-3">
+                        <label for="event_id" class="form-label">Event Pertandingan</label>
+                        <select class="form-select" id="event_id" name="event_id" required>
+                            <option value="">-- Pilih Event --</option>
+                            {% for event in event_list %}<option value="{{ event.id }}">{{ event.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
                     <button type="submit" class="btn btn-primary w-100">Tambah Peserta</button>
                 </form>
             </div>

@@ -2,10 +2,15 @@
 {% block title %}📜 Riwayat Pertandingan{% endblock %}
 
 {% block content %}
-<div class="mb-4">
-    <h1>📜 Riwayat Pertandingan</h1>
-    <p class="lead">Hasil dari sesi-sesi pertandingan yang telah selesai.</p>
+{% for event, scores in riwayat.items() %}
+<div class="card shadow-sm mb-4">
+    <div class="card-header"><h4>{{ event.nama }} <small>({{ event.tanggal.strftime('%d %b %Y') }})</small></h4></div>
+    <div class="card-body">
+        </div>
 </div>
+{% else %}
+    <div class="alert alert-info">Belum ada riwayat pertandingan.</div>
+{% endfor %}
 
 {% for sesi, skor_list in riwayat.items() %}
     <div class="card shadow-sm mb-4">

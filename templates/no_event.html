@@ -1,0 +1,10 @@
+{% extends 'layout.html' %}
+{% block title %}Tidak Ada Event Aktif{% endblock %}
+{% block content %}
+<div class="text-center">
+    <h1 class="display-4">Tidak Ada Event Aktif</h1>
+    <p class="lead">Saat ini tidak ada pertandingan yang sedang berlangsung.</p>
+    <p>Admin perlu mengaktifkan sebuah event terlebih dahulu melalui Menu Admin untuk memulai scoring.</p>
+    <a href="{{ url_for('admin_dashboard') }}" class="btn btn-primary mt-3">Buka Menu Admin</a>
+</div>
+{% endblock %}
