@@ -134,9 +134,41 @@ def live_view():
 
 @app.route('/history')
 def riwayat():
+    # Ambil semua event yang pernah ada, urutkan dari yang terbaru
     events = Event.query.order_by(Event.tanggal.desc()).all()
-    riwayat_skor = {event: Skor.query.filter_by(event_id=event.id).order_by(Skor.total_nilai.desc()).all() for event in events if Skor.query.filter_by(event_id=event.id).first()}
-    return render_template('riwayat.html', riwayat=riwayat_skor)
+    
+    # Siapkan struktur data akhir yang akan dikirim ke template
+    # Format: { event1: {kategori1: [skor, skor], kategori2: [skor]}, event2: {...} }
+    riwayat_data = {}
+
+    for event in events:
+        # Ambil semua skor untuk event ini
+        scores_in_event = Skor.query.filter_by(event_id=event.id).all()
+        
+        if not scores_in_event:
+            continue  # Lewati event yang tidak punya skor
+
+        # Siapkan dictionary untuk menampung skor per kategori di event ini
+        kategori_scores = {}
+        
+        # Kelompokkan skor berdasarkan nama kategori
+        for skor in scores_in_event:
+            kategori_nama = skor.peserta.kategori.nama
+            if kategori_nama not in kategori_scores:
+                kategori_scores[kategori_nama] = []
+            kategori_scores[kategori_nama].append(skor)
+        
+        # Urutkan skor di dalam setiap kategori berdasarkan total nilai
+        for kategori_nama in kategori_scores:
+            kategori_scores[kategori_nama] = sorted(
+                kategori_scores[kategori_nama], 
+                key=lambda x: x.total_nilai, 
+                reverse=True
+            )
+        
+        riwayat_data[event] = kategori_scores
+
+    return render_template('riwayat.html', riwayat=riwayat_data)
 
 # Tambahkan dua fungsi ini di app.py
 

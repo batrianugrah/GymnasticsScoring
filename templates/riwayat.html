@@ -7,46 +7,53 @@
 {% block content %}
 <div class="mb-4">
     <h1>📜 Riwayat Pertandingan</h1>
-    <p class="lead">Hasil dari event-event pertandingan yang telah selesai atau diarsipkan.</p>
+    <p class="lead">Hasil dari event-event pertandingan yang telah selesai, dikelompokkan berdasarkan kategori.</p>
 </div>
 
-{% for event, scores in riwayat.items() %}
+{% for event, kategori_data in riwayat.items() %}
     <div class="card shadow-sm mb-4">
-        <div class="card-header bg-light">
-            <h4 class="mb-0">{{ event.nama }} <small class="text-muted">({{ event.tanggal.strftime('%d %B %Y') }})</small></h4>
+        <div class="card-header bg-dark text-white">
+            <h3 class="mb-0">{{ event.nama }}</h3>
+            <small>{{ event.tanggal.strftime('%d %B %Y') }}</small>
         </div>
         <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-sm table-striped table-hover">
-                    <thead class="table-dark">
-                        <tr>
-                            <th style="width: 5%;">#</th>
-                            <th>Nama Peserta</th>
-                            <th>Daerah</th>
-                            <th>Alat</th>
-                            <th style="width: 15%;">Total Nilai</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for skor in scores %}
-                        <tr>
-                            <td><strong>{{ loop.index }}</strong></td>
-                            <td>
-                                <a href="{{ url_for('profil_peserta', peserta_id=skor.peserta.id) }}" class="participant-link">
-                                    {{ skor.peserta.nama }}
-                                </a>
-                            </td>
-                            <td>{{ skor.peserta.daerah.nama }}</td>
-                            <td>{{ skor.alat.nama }}</td>
-                            <td><span class="badge bg-secondary">{{ "%.3f"|format(skor.total_nilai) }}</span></td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
+            {% for kategori_nama, scores in kategori_data.items() | sort %}
+                <div class="category-block mb-4">
+                    <h5 class="border-bottom pb-2 mb-3">{{ kategori_nama }}</h5>
+                    <div class="table-responsive">
+                        <table class="table table-sm table-striped table-hover">
+                            <thead>
+                                <tr>
+                                    <th style="width: 5%;">#</th>
+                                    <th>Nama Peserta</th>
+                                    <th>Daerah</th>
+                                    <th>Alat</th>
+                                    <th style="width: 15%;">Total Nilai</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for skor in scores %}
+                                <tr>
+                                    <td><strong>{{ loop.index }}</strong></td>
+                                    <td>
+                                        <a href="{{ url_for('profil_peserta', peserta_id=skor.peserta.id) }}" class="participant-link">
+                                            {{ skor.peserta.nama }}
+                                        </a>
+                                    </td>
+                                    <td>{{ skor.peserta.daerah.nama }}</td>
+                                    <td>{{ skor.alat.nama }}</td>
+                                    <td><span class="badge bg-secondary">{{ "%.3f"|format(skor.total_nilai) }}</span></td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            {% endfor %}
         </div>
     </div>
 {% else %}
     <div class="alert alert-info">Belum ada riwayat pertandingan yang tersimpan.</div>
 {% endfor %}
+
 {% endblock %}
