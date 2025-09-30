@@ -3,6 +3,8 @@ from flask import Flask, render_template, request, redirect, url_for, jsonify, f
 from flask_sqlalchemy import SQLAlchemy
 from sqlalchemy import func
 from dateutil.parser import parse as parse_date
+from flask_login import LoginManager, UserMixin, login_user, logout_user, login_required, current_user
+from werkzeug.security import generate_password_hash, check_password_hash
 
 # --- Konfigurasi Dasar ---
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -12,8 +14,32 @@ app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
 app.config['SECRET_KEY'] = 'kunci-rahasia-untuk-proyek-ini'
 db = SQLAlchemy(app)
 
+# --- Konfigurasi Flask-Login ---
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login' # Arahkan ke route 'login' jika pengguna belum login
+login_manager.login_message = "Anda harus login untuk mengakses halaman ini."
+login_manager.login_message_category = "warning"
 
-# --- MODEL DATABASE (DENGAN MANAJEMEN EVENT) ---
+@login_manager.user_loader
+def load_user(user_id):
+    """Fungsi yang digunakan Flask-Login untuk memuat pengguna dari ID."""
+    return User.query.get(int(user_id))
+
+# --- MODEL DATABASE  ---
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(256), nullable=False)
+    role = db.Column(db.String(80), nullable=False)  # Misal: 'Admin' atau 'Juri'
+
+    def set_password(self, password):
+        """Membuat hash password dari password teks biasa."""
+        self.password_hash = generate_password_hash(password)
+
+    def check_password(self, password):
+        """Memeriksa apakah password teks biasa cocok dengan hash."""
+        return check_password_hash(self.password_hash, password)
 
 class Event(db.Model):
     id = db.Column(db.Integer, primary_key=True)
