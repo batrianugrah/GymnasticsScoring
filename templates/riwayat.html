@@ -6,49 +6,60 @@
 
 {% block content %}
 <div class="mb-4">
-    <h1>📜 Riwayat Pertandingan</h1>
-    <p class="lead">Hasil dari event-event pertandingan yang telah selesai, dikelompokkan berdasarkan kategori.</p>
+    <h1>📜 Riwayat Pertandingan (Peringkat All-Around)</h1>
+    <p class="lead">Rekapitulasi total skor peserta per kategori di setiap event.</p>
 </div>
 
-{% for event, kategori_data in riwayat.items() %}
+{% for event, groups in riwayat.items() %}
     <div class="card shadow-sm mb-4">
         <div class="card-header bg-dark text-white">
             <h3 class="mb-0">{{ event.nama }}</h3>
             <small>{{ event.tanggal.strftime('%d %B %Y') }}</small>
         </div>
         <div class="card-body">
-            {% for kategori_nama, scores in kategori_data.items() | sort %}
+            {% for group_key, summaries in groups.items() | sort %}
                 <div class="category-block mb-4">
-                    <h5 class="border-bottom pb-2 mb-3">{{ kategori_nama }}</h5>
+                    <h5 class="border-bottom pb-2 mb-3">{{ group_key }}</h5>
                     <div class="table-responsive">
                         <table class="table table-sm table-striped table-hover">
-                            <thead>
+                            <thead class="table-dark">
                                 <tr>
                                     <th style="width: 5%;">#</th>
                                     <th>Nama Peserta</th>
                                     <th>Daerah</th>
-                                    <th>Alat</th>
-                                    <th style="width: 15%;">Total Nilai</th>
+                                    <th style="width: 35%;">Rincian Skor per Alat</th>
+                                    <th style="width: 15%;">TOTAL AKHIR</th>
                                 </tr>
                             </thead>
                             <tbody>
-                                {% for skor in scores %}
+                                {% for summary in summaries %}
                                 <tr>
-                                    <td><strong>{{ loop.index }}</strong></td>
-                                    <td>
-                                        <a href="{{ url_for('profil_peserta', peserta_id=skor.peserta.id) }}" class="participant-link">
-                                            {{ skor.peserta.nama }}
+                                    <td class="align-middle"><strong>{{ loop.index }}</strong></td>
+                                    <td class="align-middle">
+                                        <a href="{{ url_for('profil_peserta', peserta_id=summary.peserta.id) }}" class="participant-link">
+                                            {{ summary.peserta.nama }}
                                         </a>
                                     </td>
-                                    <td>{{ skor.peserta.daerah.nama }}</td>
-                                    <td>{{ skor.alat.nama }}</td>
-                                    <td><span class="badge bg-secondary">{{ "%.3f"|format(skor.total_nilai) }}</span></td>
+                                    <td class="align-middle">{{ summary.peserta.daerah.nama }}</td>
+                                    <td>
+                                        {% for alat, nilai in summary.skor_alat.items() | sort %}
+                                            <div class="d-flex justify-content-between border-bottom py-1">
+                                                <span>{{ alat }}:</span>
+                                                <span>{{ "%.3f"|format(nilai) }}</span>
+                                            </div>
+                                        {% endfor %}
+                                    </td>
+                                    <td class="align-middle text-center">
+                                        <span class="badge bg-primary fs-6">{{ "%.3f"|format(summary.total_skor) }}</span>
+                                    </td>
                                 </tr>
                                 {% endfor %}
                             </tbody>
                         </table>
                     </div>
                 </div>
+            {% else %}
+                 <p class="text-center">Tidak ada skor untuk event ini.</p>
             {% endfor %}
         </div>
     </div>
