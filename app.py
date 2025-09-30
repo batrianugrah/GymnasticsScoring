@@ -134,39 +134,53 @@ def live_view():
 
 @app.route('/history')
 def riwayat():
-    # Ambil semua event yang pernah ada, urutkan dari yang terbaru
+    # Ambil semua event, urutkan dari yang terbaru
     events = Event.query.order_by(Event.tanggal.desc()).all()
     
-    # Siapkan struktur data akhir yang akan dikirim ke template
-    # Format: { event1: {kategori1: [skor, skor], kategori2: [skor]}, event2: {...} }
+    # Struktur data akhir yang akan kita bangun
     riwayat_data = {}
 
     for event in events:
-        # Ambil semua skor untuk event ini
+        # Ambil semua skor untuk event ini untuk diproses
         scores_in_event = Skor.query.filter_by(event_id=event.id).all()
         
         if not scores_in_event:
-            continue  # Lewati event yang tidak punya skor
+            continue
 
-        # Siapkan dictionary untuk menampung skor per kategori di event ini
-        kategori_scores = {}
-        
-        # Kelompokkan skor berdasarkan nama kategori
+        # Tahap 1: Agregasi skor per peserta
+        # Format: { peserta_id: {peserta: obj, skor_alat: {nama_alat: nilai}, total_skor: 0.0} }
+        participant_summary = {}
         for skor in scores_in_event:
-            kategori_nama = skor.peserta.kategori.nama
-            if kategori_nama not in kategori_scores:
-                kategori_scores[kategori_nama] = []
-            kategori_scores[kategori_nama].append(skor)
+            peserta_id = skor.peserta_id
+            if peserta_id not in participant_summary:
+                participant_summary[peserta_id] = {
+                    "peserta": skor.peserta,
+                    "skor_alat": {},
+                    "total_skor": 0.0
+                }
+            
+            # Tambahkan skor per alat dan akumulasi total skor
+            participant_summary[peserta_id]["skor_alat"][skor.alat.nama] = skor.total_nilai
+            participant_summary[peserta_id]["total_skor"] += skor.total_nilai
         
-        # Urutkan skor di dalam setiap kategori berdasarkan total nilai
-        for kategori_nama in kategori_scores:
-            kategori_scores[kategori_nama] = sorted(
-                kategori_scores[kategori_nama], 
-                key=lambda x: x.total_nilai, 
+        # Tahap 2: Kelompokkan peserta yang sudah diagregasi ke dalam kategori/grup
+        # Format: { "Kategori - Grup": [summary1, summary2] }
+        final_grouping = {}
+        for summary in participant_summary.values():
+            key = f"{summary['peserta'].kategori.nama} - {summary['peserta'].grup.nama}"
+            if key not in final_grouping:
+                final_grouping[key] = []
+            final_grouping[key].append(summary)
+            
+        # Tahap 3: Urutkan peserta di setiap grup berdasarkan total skor akhir
+        for key in final_grouping:
+            final_grouping[key] = sorted(
+                final_grouping[key], 
+                key=lambda x: x['total_skor'], 
                 reverse=True
             )
-        
-        riwayat_data[event] = kategori_scores
+            
+        riwayat_data[event] = final_grouping
 
     return render_template('riwayat.html', riwayat=riwayat_data)
 
@@ -202,28 +216,74 @@ def peringkat():
 @app.route('/peserta/<int:peserta_id>')
 def profil_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id)
-    # Ambil semua skor milik peserta ini dari semua event, diurutkan dari event terbaru
-    skor_peserta = Skor.query.filter_by(peserta_id=peserta.id)\
+    
+    # Ambil semua skor historis milik peserta ini untuk ditampilkan di tabel
+    skor_list_historis = Skor.query.filter_by(peserta_id=peserta.id)\
         .join(Event).order_by(Event.tanggal.desc()).all()
     
-    return render_template('profil_peserta.html', peserta=peserta, skor_list=skor_peserta)
+    # --- LOGIKA BARU: HITUNG TOTAL ALL-AROUND ---
+    # Filter skor hanya untuk event tempat peserta terdaftar saat ini
+    skor_event_terdaftar = [s for s in skor_list_historis if s.event_id == peserta.event_id]
+    
+    # Jumlahkan total nilai dari skor-skor tersebut
+    total_all_around = sum(s.total_nilai for s in skor_event_terdaftar)
+    # --- AKHIR LOGIKA BARU ---
+
+    return render_template(
+        'profil_peserta.html', 
+        peserta=peserta, 
+        skor_list=skor_list_historis,
+        total_all_around=total_all_around  # Kirim total skor ke template
+    )
 
 # --- API Endpoints ---
 @app.route('/api/scores')
 def api_scores():
     active_event = get_active_event()
-    if not active_event: return jsonify([])
-    # skor_terkini = Skor.query.filter_by(event_id=active_event.id).order_by(Skor.total_nilai.desc()).all()
-    skor_terkini = Skor.query.filter_by(event_id=active_event.id, sesi_pertandingan='current').order_by(Skor.total_nilai.desc()).all()
-    output = []
-    for i, s in enumerate(skor_terkini):
-        output.append({
-            'rank': i + 1, 'nama_peserta': s.peserta.nama, 'nama_daerah': s.peserta.daerah.nama,
-            'kategori': s.peserta.kategori.nama, 'grup': s.peserta.grup.nama, 'alat': s.alat.nama,
-            'nilai_d': f"{s.nilai_d:.3f}", 'nilai_e': f"{s.nilai_e:.3f}", 'nilai_a': f"{s.nilai_a:.3f}",
-            'penalti': f"{s.penalti:.3f}", 'total_nilai': f"{s.total_nilai:.3f}"
-        })
-    return jsonify(output)
+    if not active_event:
+        return jsonify({})
+
+    # Ambil hanya skor yang berstatus 'current' untuk event aktif
+    live_scores = Skor.query.filter_by(
+        event_id=active_event.id, 
+        sesi_pertandingan='current'
+    ).all()
+
+    # Tahap 1: Agregasi skor per peserta
+    participant_summary = {}
+    for skor in live_scores:
+        peserta_id = skor.peserta_id
+        if peserta_id not in participant_summary:
+            participant_summary[peserta_id] = {
+                "peserta": {
+                    "id": skor.peserta.id,
+                    "nama": skor.peserta.nama,
+                    "daerah": skor.peserta.daerah.nama
+                },
+                "skor_alat": {},
+                "total_skor": 0.0
+            }
+        participant_summary[peserta_id]["skor_alat"][skor.alat.nama] = skor.total_nilai
+        participant_summary[peserta_id]["total_skor"] += skor.total_nilai
+    
+    # Tahap 2: Kelompokkan peserta ke dalam kategori/grup
+    final_grouping = {}
+    for summary in participant_summary.values():
+        peserta_obj = Peserta.query.get(summary['peserta']['id']) # Ambil objek peserta untuk dapat info kategori/grup
+        key = f"{peserta_obj.kategori.nama} - {peserta_obj.grup.nama}"
+        if key not in final_grouping:
+            final_grouping[key] = []
+        final_grouping[key].append(summary)
+        
+    # Tahap 3: Urutkan peserta di setiap grup berdasarkan total skor akhir
+    for key in final_grouping:
+        final_grouping[key] = sorted(
+            final_grouping[key], 
+            key=lambda x: x['total_skor'], 
+            reverse=True
+        )
+            
+    return jsonify(final_grouping)
 
 @app.route('/api/grup_by_kategori/<int:kategori_id>')
 def api_grup_by_kategori(kategori_id):

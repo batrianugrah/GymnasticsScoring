@@ -18,6 +18,15 @@
         </p>
     </div>
 </div>
+<div class="card text-center bg-primary text-white my-4 shadow">
+    <div class="card-body">
+        <h6 class="card-subtitle mb-2 text-white-50" style="letter-spacing: 1px;">SKOR TOTAL ALL-AROUND</h6>
+        <p class="card-text display-4 fw-bold">
+            {{ "%.3f"|format(total_all_around) }}
+        </p>
+        <small class="opacity-75">(Untuk Event: {{ peserta.event.nama }})</small>
+    </div>
+</div>
 
 <h3 class="mt-4">Riwayat Skor Pertandingan</h3>
 <div class="table-responsive">

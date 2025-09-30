@@ -1,34 +1,124 @@
 {% extends 'layout.html' %}
-{% block title %}🔴 Live Score{% endblock %}
+
+{% block title %}
+    🔴 Live Score All-Around - {% if active_event %}{{ active_event.nama }}{% else %}Event Tidak Aktif{% endif %}
+{% endblock %}
 
 {% block content %}
 <div class="text-center mb-4">
-    <h1>🔴 Live Score Pertandingan</h1>
-    <p class="lead">Peringkat akan diperbarui secara otomatis</p>
+    <h1>🔴 Live Score All-Around</h1>
+    {% if active_event %}
+    <p class="lead">Papan skor akan diperbarui secara otomatis untuk event: <strong>{{ active_event.nama }}</strong></p>
+    {% endif %}
 </div>
 
-<div class="table-responsive">
-    <table class="table table-bordered table-striped table-hover">
-        <thead class="table-dark text-center">
-            <tr>
-                <th>Peringkat</th>
-                <th>Nama Peserta</th>
-                <th>Asal Daerah</th>
-                <th>Alat</th>
-                <th>Nilai D</th>
-                <th>Nilai E</th>
-                <th>Nilai A</th>
-                <th>Penalti</th>
-                <th>Total Nilai</th>
-            </tr>
-        </thead>
-        <tbody id="live-score-table" class="text-center">
-            <tr><td colspan="9">Memuat data...</td></tr>
-        </tbody>
-    </table>
+<div id="live-score-container">
+    <div class="text-center">
+        <div class="spinner-border" role="status">
+            <span class="visually-hidden">Loading...</span>
+        </div>
+        <p>Memuat data skor...</p>
+    </div>
 </div>
 {% endblock %}
 
 {% block scripts %}
-<script src="{{ url_for('static', filename='js/live.js') }}"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const scoreContainer = document.getElementById('live-score-container');
+
+    function renderScores(data) {
+        // Hapus konten lama
+        scoreContainer.innerHTML = '';
+
+        const sortedGroupKeys = Object.keys(data).sort();
+
+        if (sortedGroupKeys.length === 0) {
+            scoreContainer.innerHTML = `<div class="alert alert-info text-center">Menunggu skor live pertama...</div>`;
+            return;
+        }
+
+        // Loop untuk setiap grup kategori (misal: "Artistik Putra - Senior")
+        for (const groupKey of sortedGroupKeys) {
+            const summaries = data[groupKey];
+            
+            let tableRows = '';
+            // Loop untuk setiap peserta di dalam grup
+            summaries.forEach((summary, index) => {
+                
+                let apparatusDetails = '';
+                // Loop untuk setiap skor alat peserta
+                for (const alat in summary.skor_alat) {
+                    apparatusDetails += `
+                        <div class="d-flex justify-content-between border-bottom py-1">
+                            <span>${alat}:</span>
+                            <span>${summary.skor_alat[alat].toFixed(3)}</span>
+                        </div>
+                    `;
+                }
+
+                tableRows += `
+                    <tr>
+                        <td class="align-middle text-center"><strong>${index + 1}</strong></td>
+                        <td class="align-middle">
+                            <a href="/peserta/${summary.peserta.id}" class="participant-link" target="_blank">${summary.peserta.nama}</a>
+                        </td>
+                        <td class="align-middle">${summary.peserta.daerah}</td>
+                        <td>${apparatusDetails}</td>
+                        <td class="align-middle text-center">
+                            <span class="badge bg-primary fs-5">${summary.total_skor.toFixed(3)}</span>
+                        </td>
+                    </tr>
+                `;
+            });
+
+            // Buat HTML untuk satu blok kategori penuh
+            const groupBlock = `
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-light">
+                        <h4 class="mb-0">${groupKey}</h4>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-responsive">
+                            <table class="table table-sm table-striped table-hover">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th style="width: 5%;">#</th>
+                                        <th>Nama Peserta</th>
+                                        <th>Daerah</th>
+                                        <th style="width: 35%;">Rincian Skor per Alat</th>
+                                        <th style="width: 15%;" class="text-center">TOTAL AKHIR</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    ${tableRows}
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            `;
+            scoreContainer.innerHTML += groupBlock;
+        }
+    }
+
+    async function fetchScores() {
+        try {
+            const response = await fetch('/api/scores');
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            const data = await response.json();
+            renderScores(data);
+        } catch (error) {
+            console.error("Could not fetch scores:", error);
+            scoreContainer.innerHTML = `<div class="alert alert-danger text-center">Gagal memuat data. Mencoba lagi...</div>`;
+        }
+    }
+
+    // Panggil fetchScores setiap 5 detik
+    fetchScores(); // Panggil sekali saat halaman dimuat
+    setInterval(fetchScores, 5000); 
+});
+</script>
 {% endblock %}
