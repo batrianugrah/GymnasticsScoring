@@ -1,118 +1,58 @@
 {% extends 'layout.html' %}
-{% block title %}Input Skor Pertandingan{% endblock %}
+{% block title %}Input Skor - {{ event.nama }}{% endblock %}
+
 {% block content %}
-<div class="row">
+{% include 'event_subnav.html' %}
+
+<!-- LANGKAH 1: Simpan event.id di dalam atribut data-event-id -->
+<div class="row" data-event-id="{{ event.id }}">
     <div class="col-lg-5">
         <div class="card shadow-sm">
-            <div class="card-header bg-primary text-white">
-                <h4>📝 Input Nilai Pertandingan</h4>
-            </div>
-            
+            <div class="card-header bg-primary text-white"><h4>📝 Input Nilai Pertandingan</h4></div>
             <div class="card-body">
-                <form action="{{ url_for('input_skor') }}" method="post">
-                    <div class="mb-3">
-                        <label for="kategori" class="form-label">1. Pilih Kategori</label>
-                        <select class="form-select" id="kategori" name="kategori_id" required>
-                            <option value="">-- Pilih Kategori --</option>
-                            {% for k in data.kategori %}<option value="{{ k.id }}">{{ k.nama }}</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="grup" class="form-label">2. Pilih Grup</label>
-                        <select class="form-select" id="grup" name="grup_id" required>
-                            <option value="">-- Menunggu Kategori Dipilih --</option>
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="alat" class="form-label">3. Pilih Alat</label>
-                        <select class="form-select" id="alat" name="alat" required>
-                            <option value="">-- Pilih Alat --</option>
-                            {% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}
-                        </select>
-                    </div>
-                    <div class="mb-3">
-                        <label for="peserta" class="form-label">4. Pilih Peserta</label>
-                        <select class="form-select" id="peserta" name="peserta" required>
-                            <option value="">-- Menunggu Kategori, Grup, & Alat Dipilih --</option>
-                        </select>
-                    </div>
-                    <!-- <div class="mb-3">
-                        <label for="peserta" class="form-label">3. Pilih Peserta</label>
-                        <select class="form-select" id="peserta" name="peserta" required>
-                             <option value="">-- Menunggu Grup Dipilih --</option>
-                        </select>
-                    </div> -->
-                    <!-- <div class="mb-3">
-                        <label for="alat" class="form-label">4. Pilih Alat</label>
-                        <select class="form-select" id="alat" name="alat" required>
-                            <option value="">-- Pilih Alat --</option>
-                            {% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}
-                        </select>
-                    </div> -->
+                <form action="{{ url_for('input_skor', event_id=event.id) }}" method="post">
+                    <div class="mb-3"><label class="form-label">1. Pilih Kategori</label><select class="form-select" id="kategori" name="kategori_id" required><option value="">-- Pilih Kategori --</option>{% for k in data.kategori %}<option value="{{ k.id }}">{{ k.nama }}</option>{% endfor %}</select></div>
+                    <div class="mb-3"><label class="form-label">2. Pilih Grup</label><select class="form-select" id="grup" name="grup_id" required><option value="">-- Pilih Grup --</option>{% for g in data.grup %}<option value="{{ g.id }}">{{ g.nama }}</option>{% endfor %}</select></div>
+                    <div class="mb-3"><label class="form-label">3. Pilih Alat</label><select class="form-select" id="alat" name="alat" required><option value="">-- Pilih Alat --</option>{% for a in data.alat %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}</select></div>
+                    <div class="mb-3"><label class="form-label">4. Pilih Peserta</label><select class="form-select" id="peserta" name="peserta" required><option value="">-- Isi semua filter di atas --</option></select></div>
                     <hr>
                     <div class="row mb-3">
-                        <div class="col-sm-4"><label for="nilai_d" class="form-label">Nilai D</label><input type="number" step="0.001" class="form-control" name="nilai_d" required></div>
-                        <div class="col-sm-4"><label for="nilai_e" class="form-label">Nilai E</label><input type="number" step="0.001" class="form-control" name="nilai_e" required></div>
-                        <div class="col-sm-4"><label for="nilai_a" class="form-label">Nilai A</label><input type="number" step="0.001" class="form-control" name="nilai_a"></div>
+                        <div class="col-sm-4"><label class="form-label">Nilai D</label><input type="number" step="0.001" class="form-control" name="nilai_d" required></div>
+                        <div class="col-sm-4"><label class="form-label">Nilai E</label><input type="number" step="0.001" class="form-control" name="nilai_e" required></div>
+                        <div class="col-sm-4"><label class="form-label">Nilai A</label><input type="number" step="0.001" class="form-control" name="nilai_a"></div>
                     </div>
-                    <div class="mb-3"><label for="penalti" class="form-label">Penalti</label><input type="number" step="0.001" class="form-control" name="penalti" value="0"></div>
-                    
+                    <div class="mb-3"><label class="form-label">Penalti</label><input type="number" step="0.001" class="form-control" name="penalti" value="0"></div>
                     <button type="submit" class="btn btn-primary w-100">Simpan Skor</button>
                 </form>
             </div>
         </div>
         <div class="card shadow-sm mt-4">
-            <div class="card shadow-sm mt-4">
-                <div class="card-header bg-warning text-dark">
-                    <h4>⚙️ Kontrol Ronde Pertandingan</h4>
-                </div>
-                <div class="card-body">
-                    <p>Gunakan tombol ini setelah semua peserta dalam satu kategori/ronde selesai dinilai.</p>
-                    <p>Ini akan mengarsipkan skor saat ini dan mengosongkan papan skor live untuk ronde berikutnya.</p>
-                    <form action="{{ url_for('archive_scores') }}" method="post" onsubmit="return confirm('Apakah Anda yakin ingin mengarsipkan semua skor live saat ini?');">
-                        <button type="submit" class="btn btn-warning w-100">
-                            Arsipkan Skor & Lanjutkan Kategori Berikutnya
-                        </button>
-                    </form>
-                </div>
-            </div>
-             <div class="card-header bg-danger text-white"><h4>⚙️ Kontrol Pertandingan</h4></div>
-             <div class="card-body">
-                <p>Mulai pertandingan baru. Skor saat ini akan diarsipkan ke riwayat.</p>
-                <form action="{{ url_for('reset_skor') }}" method="post" onsubmit="return confirm('Yakin ingin memulai sesi baru?');">
-                    <button type="submit" class="btn btn-danger w-100">Reset & Mulai Sesi Baru</button>
+            <div class="card-header bg-warning text-dark"><h4>⚙️ Kontrol Ronde</h4></div>
+            <div class="card-body">
+                <p>Gunakan tombol ini setelah satu ronde selesai untuk mengosongkan papan skor live.</p>
+                <form action="{{ url_for('archive_scores', event_id=event.id) }}" method="post" onsubmit="return confirm('Yakin ingin mengarsipkan skor live saat ini?');">
+                    <button type="submit" class="btn btn-warning w-100">Arsipkan Skor & Lanjutkan</button>
                 </form>
             </div>
         </div>
     </div>
     <div class="col-lg-7">
-        <h3 class="mb-3">📊 Ranking Sementara</h3>
+        <h3 class="mb-3">📊 Ranking Sementara (Live)</h3>
         <div class="table-responsive">
             <table class="table table-striped table-hover">
-                <thead class="table-dark">
-                    <tr>
-                        <th>#</th>
-                        <th>Nama</th>
-                        <th>Alat</th>
-                        <th>Total</th>
-                        <th>Aksi</th>
-                    </tr>
-                </thead>
+                <thead class="table-dark"><tr><th>#</th><th>Nama</th><th>Alat</th><th>Total</th><th>Aksi</th></tr></thead>
                 <tbody>
-                    {% for s in ranking %}
+                {% for s in ranking %}
                     <tr>
                         <td><strong>{{ loop.index }}</strong></td>
-                        <!-- <td>{{ s.peserta.nama }} <small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td> -->
-                        <td><a href="{{ url_for('profil_peserta', peserta_id=s.peserta.id) }}" class="participant-link">{{ s.peserta.nama }}</a> <small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td>
+                        <td><a href="{{ url_for('profil_peserta', peserta_id=s.peserta.id) }}" class="participant-link">{{ s.peserta.nama }}</a><small class="text-muted d-block">{{ s.peserta.daerah.nama }}</small></td>
                         <td>{{ s.alat.nama }}</td>
                         <td><span class="badge bg-success fs-6">{{ "%.3f"|format(s.total_nilai) }}</span></td>
-                        <td>
-                            <a href="{{ url_for('edit_skor', skor_id=s.id) }}" class="btn btn-sm btn-warning">Edit</a>
-                        </td>
+                        <td><a href="{{ url_for('edit_skor', skor_id=s.id) }}" class="btn btn-sm btn-warning">Edit</a></td>
                     </tr>
-                    {% else %}
-                    <tr><td colspan="5" class="text-center">Belum ada skor yang diinput.</td></tr>
-                    {% endfor %}
+                {% else %}
+                    <tr><td colspan="5" class="text-center">Belum ada skor live.</td></tr>
+                {% endfor %}
                 </tbody>
             </table>
         </div>
@@ -123,83 +63,47 @@
 {% block scripts %}
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    // LANGKAH 2: Baca eventId dari atribut data-*
+    const container = document.querySelector('.row[data-event-id]');
+    const eventId = container.dataset.eventId;
+
     const kategoriSelect = document.getElementById('kategori');
     const grupSelect = document.getElementById('grup');
     const alatSelect = document.getElementById('alat');
     const pesertaSelect = document.getElementById('peserta');
 
-    function resetSelect(select, message) {
-        select.innerHTML = `<option value="">${message}</option>`;
-    }
-
     async function fetchPeserta() {
         const kategoriId = kategoriSelect.value;
         const grupId = grupSelect.value;
         const alatId = alatSelect.value;
-
-        resetSelect(pesertaSelect, '-- Memuat Peserta... --');
-
+        pesertaSelect.innerHTML = '<option value="">-- Memuat Peserta... --</option>';
         if (!kategoriId || !grupId || !alatId) {
-            resetSelect(pesertaSelect, '-- Menunggu Kategori, Grup, & Alat Dipilih --');
+            pesertaSelect.innerHTML = '<option value="">-- Isi semua filter di atas --</option>';
             return;
         }
-
         try {
-            const response = await fetch(`/api/peserta_by_grup_alat/${kategoriId}/${grupId}/${alatId}`);
-            if (!response.ok) throw new Error('Gagal mengambil data dari server');
-            
+            const response = await fetch(`/api/event/${eventId}/peserta_by_filters?kategori_id=${kategoriId}&grup_id=${grupId}&alat_id=${alatId}`);
+            if (!response.ok) throw new Error('Gagal mengambil data');
             const pesertas = await response.json();
-
             if (pesertas.length > 0) {
                 let options = '<option value="">-- Pilih Peserta --</option>';
-                pesertas.forEach(peserta => {
-                    const text = `${peserta.nama} (${peserta.daerah})`;
-                    const isDisabled = peserta.scored;
-                    const suffix = isDisabled ? ' (Sudah dinilai ✓)' : '';
-                    const disabledAttr = isDisabled ? 'disabled' : '';
-                    
-                    options += `<option value="${peserta.id}" ${disabledAttr}>${text}${suffix}</option>`;
+                pesertas.forEach(p => {
+                    const text = `${p.nama} (${p.daerah})`;
+                    const suffix = p.scored ? ' (Sudah dinilai ✓)' : '';
+                    const disabled = p.scored ? 'disabled' : '';
+                    options += `<option value="${p.id}" ${disabled}>${text}${suffix}</option>`;
                 });
                 pesertaSelect.innerHTML = options;
             } else {
-                resetSelect(pesertaSelect, '-- Tidak ada Peserta yang cocok --');
+                pesertaSelect.innerHTML = '<option value="">-- Tidak ada Peserta --</option>';
             }
         } catch (error) {
-            console.error('Error fetching participants:', error);
-            resetSelect(pesertaSelect, '-- Gagal Memuat Data --');
+            console.error('Error:', error);
+            pesertaSelect.innerHTML = '<option value="">-- Gagal Memuat --</option>';
         }
     }
 
-    kategoriSelect.addEventListener('change', async function() {
-        const kategoriId = this.value;
-        resetSelect(grupSelect, '-- Memuat Grup... --');
-        resetSelect(pesertaSelect, '-- Menunggu Grup & Alat Dipilih --');
-
-        if (!kategoriId) {
-            resetSelect(grupSelect, '-- Menunggu Kategori Dipilih --');
-            return;
-        }
-
-        try {
-            const response = await fetch(`/api/grup_by_kategori/${kategoriId}`);
-            if (!response.ok) throw new Error('Gagal mengambil data dari server');
-            const grups = await response.json();
-
-            if (grups.length > 0) {
-                let options = '<option value="">-- Pilih Grup --</option>';
-                grups.forEach(grup => {
-                    options += `<option value="${grup.id}">${grup.nama}</option>`;
-                });
-                grupSelect.innerHTML = options;
-            } else {
-                resetSelect(grupSelect, '-- Tidak ada Grup di Kategori ini --');
-            }
-        } catch (error) {
-            console.error('Error fetching groups:', error);
-            resetSelect(grupSelect, '-- Gagal Memuat Data --');
-        }
-    });
-
+    kategoriSelect.addEventListener('change', fetchPeserta);
     grupSelect.addEventListener('change', fetchPeserta);
     alatSelect.addEventListener('change', fetchPeserta);
 });
