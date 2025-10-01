@@ -1,0 +1,36 @@
+{% extends 'layout.html' %}
+
+{% block title %}
+    Edit Event: {{ event.nama }}
+{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="card shadow-sm">
+            <div class="card-header bg-warning">
+                <h4 class="mb-0">✏️ Edit Data Event</h4>
+            </div>
+            <div class="card-body">
+                <form method="post">
+                    <div class="mb-3">
+                        <label for="nama" class="form-label">Nama Event</label>
+                        <input type="text" class="form-control" id="nama" name="nama" value="{{ event.nama }}" required>
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="tanggal" class="form-label">Tanggal</label>
+                        {# Format tanggal ke YYYY-MM-DD agar value input type="date" benar #}
+                        <input type="date" class="form-control" id="tanggal" name="tanggal" value="{{ event.tanggal.strftime('%Y-%m-%d') }}" required>
+                    </div>
+                    
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <a href="{{ url_for('admin_manage_event') }}" class="btn btn-secondary">Batal</a>
+                        <button type="submit" class="btn btn-primary">Simpan Perubahan</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

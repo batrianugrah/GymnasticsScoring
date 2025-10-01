@@ -25,14 +25,30 @@
             <tbody>
             {% for event in events %}
                 <tr class="{{ 'table-success' if event.is_active else '' }}">
-                    <td>{% if event.is_active %}<span class="badge bg-success">Aktif</span>{% else %}<span class="badge bg-secondary">Tidak Aktif</span>{% endif %}</td>
+                    <td>
+                        {% if event.is_active %}
+                            <span class="badge bg-success">Aktif</span>
+                        {% else %}
+                            <span class="badge bg-secondary">Tidak Aktif</span>
+                        {% endif %}
+                    </td>
                     <td>{{ event.nama }}</td>
                     <td>{{ event.tanggal.strftime('%d %B %Y') }}</td>
                     <td class="text-end d-flex gap-1 justify-content-end">
+            
+                        <!-- TOMBOL EDIT BARU -->
+                        <a href="{{ url_for('admin_edit_event', event_id=event.id) }}" class="btn btn-sm btn-warning">Edit</a>
+
                         {% if not event.is_active %}
-                        <form action="{{ url_for('admin_activate_event', event_id=event.id) }}" method="post"><button class="btn btn-sm btn-success">Aktifkan</button></form>
+                        <form action="{{ url_for('admin_activate_event', event_id=event.id) }}" method="post" class="d-inline">
+                            <button class="btn btn-sm btn-success">Aktifkan</button>
+                        </form>
                         {% endif %}
-                        <form action="{{ url_for('admin_delete_event', event_id=event.id) }}" method="post" onsubmit="return confirm('Yakin menghapus event ini? SEMUA PESERTA DAN SKOR di dalamnya akan hilang.');"><button class="btn btn-sm btn-danger">Hapus</button></form>
+
+                        <form action="{{ url_for('admin_delete_event', event_id=event.id) }}" method="post" class="d-inline" onsubmit="return confirm('Yakin menghapus event ini? SEMUA PESERTA DAN SKOR di dalamnya akan hilang.');">
+                            <button class="btn btn-sm btn-danger">Hapus</button>
+                        </form>
+
                     </td>
                 </tr>
             {% else %}

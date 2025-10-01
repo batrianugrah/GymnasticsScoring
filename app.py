@@ -240,6 +240,34 @@ def admin_delete_event(event_id):
     flash(f"Event '{event.nama}' dan semua data terkait berhasil dihapus.", "success")
     return redirect(url_for('admin_manage_event'))
 
+@app.route('/admin/event/edit/<int:event_id>', methods=['GET', 'POST'])
+def admin_edit_event(event_id):
+    event_to_edit = Event.query.get_or_404(event_id)
+    
+    if request.method == 'POST':
+        # Ambil data baru dari form
+        new_name = request.form.get('nama')
+        new_date_str = request.form.get('tanggal')
+
+        if new_name and new_date_str:
+            try:
+                # Update data event
+                event_to_edit.nama = new_name
+                event_to_edit.tanggal = parse_date(new_date_str).date()
+                db.session.commit()
+                flash(f"Event '{event_to_edit.nama}' berhasil diperbarui.", "success")
+                return redirect(url_for('admin_manage_event'))
+            except ValueError:
+                flash("Format tanggal tidak valid.", "danger")
+        else:
+            flash("Nama dan Tanggal Event tidak boleh kosong.", "danger")
+        
+        # Jika ada error, kembali ke halaman edit
+        return redirect(url_for('admin_edit_event', event_id=event_id))
+
+    # Saat GET request, tampilkan form edit dengan data yang ada
+    return render_template('admin_edit_event.html', event=event_to_edit)
+
 def get_model_map():
     return {'daerah': {'model': Daerah, 'title': 'Daerah'},'kategori': {'model': Kategori, 'title': 'Kategori'},'grup': {'model': Grup, 'title': 'Grup'},'alat': {'model': Alat, 'title': 'Alat'}}
 @app.route('/admin/manage/<master_type>', methods=['GET', 'POST'])
@@ -286,6 +314,7 @@ def admin_manage_peserta():
     return render_template('admin_manage_peserta.html', peserta_list=pagination.items, pagination=pagination,
         daerah_list=Daerah.query.order_by(Daerah.nama).all(), kategori_list=Kategori.query.order_by(Kategori.nama).all(),
         grup_list=Grup.query.order_by(Grup.nama).all(), event_list=Event.query.order_by(Event.nama).all(), current_sort=sort_by)
+
 @app.route('/admin/edit/peserta/<int:peserta_id>', methods=['GET', 'POST'])
 def admin_edit_peserta(peserta_id):
     peserta_to_edit = Peserta.query.get_or_404(peserta_id)
@@ -298,6 +327,7 @@ def admin_edit_peserta(peserta_id):
     return render_template('admin_edit_peserta.html', peserta=peserta_to_edit,
         daerah_list=Daerah.query.order_by(Daerah.nama).all(), kategori_list=Kategori.query.order_by(Kategori.nama).all(),
         grup_list=Grup.query.order_by(Grup.nama).all(), event_list=Event.query.order_by(Event.nama).all())
+
 @app.route('/admin/delete/peserta/<int:peserta_id>', methods=['POST'])
 def admin_delete_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id); db.session.delete(peserta); db.session.commit()

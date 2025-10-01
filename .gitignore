@@ -1,0 +1,15 @@
+# Virtual Environment
+.venv/
+venv/
+__pycache__/
+
+# Database lokal
+*.db
+*.sqlite3
+
+# File backup
+*.xlsx
+
+# IDE / Editor folders
+.vscode/
+.idea/
