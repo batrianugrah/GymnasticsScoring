@@ -15,7 +15,10 @@
                 <a class="nav-link {% if request.endpoint == 'peringkat' %}active{% endif %}" href="{{ url_for('peringkat', event_id=event.id) }}">Peringkat Detail</a>
             </li>
             <li class="nav-item">
-                <a class="nav-link" href="{{ url_for('live_view', event_id=event.id) }}" target="_blank">Live View</a>
+                <a class="nav-link" href="{{ url_for('live_view', event_id=event.id) }}" target="_blank">Live View (All-Around)</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link" href="{{ url_for('now_scoring', event_id=event.id) }}" target="_blank">Now Scoring (Flash)</a>
             </li>
         </ul>
     </div>

@@ -176,6 +176,12 @@ def archive_scores(event_id):
     db.session.commit(); flash("Skor 'live' telah diarsipkan.", "success")
     return redirect(url_for('input_skor', event_id=event_id))
 
+@app.route('/event/<int:event_id>/now_scoring')
+def now_scoring(event_id):
+    event = Event.query.get_or_404(event_id)
+    # Kita hanya butuh event untuk judul, data skor akan diambil oleh JavaScript
+    return render_template('now_scoring.html', event=event)
+
 # --- API Endpoints ---
 @app.route('/api/event/<int:event_id>/scores')
 def api_scores(event_id):
@@ -205,6 +211,33 @@ def api_peserta_by_filters(event_id):
     scored_peserta_ids = {skor.peserta_id for skor in Skor.query.filter_by(event_id=event_id, alat_id=alat_id, sesi_pertandingan='current').all()}
     peserta_array = [{'id': p.id, 'nama': p.nama, 'daerah': p.daerah.nama,'scored': p.id in scored_peserta_ids} for p in pesertas_in_grup]
     return jsonify(sorted(peserta_array, key=lambda x: x['nama']))
+
+@app.route('/api/event/<int:event_id>/latest_score')
+def api_latest_score(event_id):
+    # Ambil skor TERBARU untuk event ini yang statusnya 'current'
+    latest_score = Skor.query.filter_by(event_id=event_id, sesi_pertandingan='current')\
+                             .order_by(Skor.id.desc())\
+                             .first()
+
+    if not latest_score:
+        # Jika tidak ada skor, kirim objek kosong
+        return jsonify({})
+
+    # Siapkan data dalam format JSON
+    score_data = {
+        'nama_peserta': latest_score.peserta.nama,
+        'nama_daerah': latest_score.peserta.daerah.nama,
+        'nama_event': latest_score.event.nama,
+        'kategori': latest_score.peserta.kategori.nama,
+        'grup': latest_score.peserta.grup.nama,
+        'alat': latest_score.alat.nama,
+        'nilai_d': f"{latest_score.nilai_d:.3f}",
+        'nilai_e': f"{latest_score.nilai_e:.3f}",
+        'nilai_a': f"{latest_score.nilai_a:.3f}",
+        'penalti': f"{latest_score.penalti:.3f}",
+        'total_nilai': f"{latest_score.total_nilai:.3f}"
+    }
+    return jsonify(score_data)
 
 # --- Area Admin ---
 @app.route('/admin')
