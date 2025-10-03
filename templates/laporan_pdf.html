@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Laporan Hasil - {{ event.nama }}</title>
+    <style>
+        body { font-family: 'Helvetica', 'Arial', sans-serif; font-size: 10pt; }
+        .header { text-align: center; border-bottom: 2px solid black; padding-bottom: 10px; margin-bottom: 20px; }
+        .header img { height: 60px; float: left; }
+        .header h1 { margin: 0; font-size: 18pt; }
+        .header h2 { margin: 5px 0; font-size: 14pt; font-weight: normal; }
+        .footer { position: fixed; bottom: 0; width: 100%; text-align: center; font-size: 8pt; color: #777; }
+        table { width: 100%; border-collapse: collapse; margin-bottom: 20px; }
+        th, td { border: 1px solid #ccc; padding: 6px; text-align: left; }
+        thead { background-color: #f2f2f2; }
+        th { font-weight: bold; }
+        .group-header { font-size: 14pt; font-weight: bold; margin-top: 25px; border-bottom: 1px solid #999; padding-bottom: 5px; }
+        .total-score { font-weight: bold; }
+        .score-details { font-size: 9pt; }
+        .score-details div { display: flex; justify-content: space-between; }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='img/kota.png', _external=True) }}" alt="Logo">
+        <h1>HASIL AKHIR RESMI</h1>
+        <h2>{{ event.nama }}</h2>
+        <p>{{ event.tanggal.strftime('%d %B %Y') }}</p>
+    </div>
+
+    {% for group_key, summaries in report_data.items() | sort %}
+        <h3 class="group-header">{{ group_key }}</h3>
+        <table>
+            <thead>
+                <tr>
+                    <th style="width: 5%;">#</th>
+                    <th>Nama Peserta</th>
+                    <th>Daerah</th>
+                    <th style="width: 35%;">Rincian Skor</th>
+                    <th style="width: 15%;">Total Akhir</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for summary in summaries %}
+                <tr>
+                    <td>{{ loop.index }}</td>
+                    <td>{{ summary.peserta.nama }}</td>
+                    <td>{{ summary.peserta.daerah.nama }}</td>
+                    <td class="score-details">
+                        {% for alat, nilai in summary.skor_alat.items() | sort %}
+                            <div><span>{{ alat }}:</span><span>{{ "%.3f"|format(nilai) }}</span></div>
+                        {% endfor %}
+                    </td>
+                    <td class="total-score">{{ "%.3f"|format(summary.total_skor) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    {% endfor %}
+
+    <div class="footer">
+        Laporan ini dibuat secara otomatis oleh Sistem Gymnastics Scoring pada {{ generation_date }}
+    </div>
+</body>
+</html>

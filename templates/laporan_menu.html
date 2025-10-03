@@ -1,0 +1,28 @@
+{% extends 'layout.html' %}
+{% block title %}Pilih Laporan Event{% endblock %}
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Pusat Laporan</h1>
+    <p class="lead">Silakan pilih event untuk melihat atau mengunduh laporan hasil akhir.</p>
+</div>
+
+<div class="row justify-content-center">
+    <div class="col-md-8">
+        <div class="list-group shadow-sm">
+            {% for event in events %}
+                <div class="list-group-item d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="mb-1">{{ event.nama }}</h5>
+                        <small class="text-muted">{{ event.tanggal.strftime('%d %B %Y') }}</small>
+                    </div>
+                    <a href="{{ url_for('laporan_detail', event_id=event.id) }}" class="btn btn-primary">
+                        Lihat Laporan &rarr;
+                    </a>
+                </div>
+            {% else %}
+                <div class="list-group-item text-center text-muted">Belum ada event yang dapat dilaporkan.</div>
+            {% endfor %}
+        </div>
+    </div>
+</div>
+{% endblock %}

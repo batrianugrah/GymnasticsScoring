@@ -107,6 +107,46 @@ def riwayat():
         riwayat_data[event] = final_grouping
     return render_template('riwayat.html', riwayat=riwayat_data)
 
+@app.route('/laporan')
+def laporan_menu():
+    """Halaman untuk memilih event yang akan dilihat laporannya."""
+    events = Event.query.order_by(Event.tanggal.desc()).all()
+    return render_template('laporan_menu.html', events=events)
+
+@app.route('/laporan/<int:event_id>')
+def laporan_detail(event_id):
+    """Menampilkan detail laporan All-Around untuk satu event."""
+    event = Event.query.get_or_404(event_id)
+    report_data = _calculate_all_around(event_id)
+    return render_template('laporan_detail.html', event=event, report_data=report_data)
+
+@app.route('/export/laporan/<int:event_id>/pdf')
+def export_laporan_pdf(event_id):
+    """Menghasilkan laporan dalam format PDF."""
+    event = Event.query.get_or_404(event_id)
+    report_data = _calculate_all_around(event_id)
+
+    # Render template khusus untuk PDF
+    rendered_html = render_template(
+        'laporan_pdf.html', 
+        event=event, 
+        report_data=report_data,
+        generation_date=datetime.now().strftime('%d %B %Y %H:%M:%S')
+    )
+
+    # Buat PDF menggunakan WeasyPrint
+    pdf = HTML(string=rendered_html).write_pdf()
+
+    # Buat nama file yang dinamis
+    filename = f"Laporan_{event.nama.replace(' ', '_')}.pdf"
+
+    return send_file(
+        io.BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename
+    )
+
 @app.route('/peserta/<int:peserta_id>')
 def profil_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id)
@@ -303,6 +343,7 @@ def admin_edit_event(event_id):
 
 def get_model_map():
     return {'daerah': {'model': Daerah, 'title': 'Daerah'},'kategori': {'model': Kategori, 'title': 'Kategori'},'grup': {'model': Grup, 'title': 'Grup'},'alat': {'model': Alat, 'title': 'Alat'}}
+
 @app.route('/admin/manage/<master_type>', methods=['GET', 'POST'])
 def admin_manage_generic(master_type):
     model_map = get_model_map();
@@ -317,6 +358,7 @@ def admin_manage_generic(master_type):
         else: flash("Nama tidak boleh kosong.", "danger")
         return redirect(url_for('admin_manage_generic', master_type=master_type))
     return render_template('admin_manage_generic.html', items=Model.query.order_by(Model.nama).all(), config=config, master_type=master_type)
+
 @app.route('/admin/delete/<master_type>/<int:item_id>', methods=['POST'])
 def admin_delete_generic(master_type, item_id):
     model_map = get_model_map();
@@ -437,6 +479,35 @@ def export_event(event_id, format):
     
     return "Format tidak valid.", 400
 
+def _calculate_all_around(event_id):
+    """Menghitung rekapitulasi skor All-Around untuk sebuah event."""
+    scores_in_event = Skor.query.filter_by(event_id=event_id).all()
+    if not scores_in_event:
+        return {}
+
+    participant_summary = {}
+    for skor in scores_in_event:
+        peserta_id = skor.peserta_id
+        if peserta_id not in participant_summary:
+            participant_summary[peserta_id] = {
+                "peserta": skor.peserta,
+                "skor_alat": {},
+                "total_skor": 0.0
+            }
+        participant_summary[peserta_id]["skor_alat"][skor.alat.nama] = skor.total_nilai
+        participant_summary[peserta_id]["total_skor"] += skor.total_nilai
+
+    final_grouping = {}
+    for summary in participant_summary.values():
+        key = f"{summary['peserta'].kategori.nama} - {summary['peserta'].grup.nama}"
+        if key not in final_grouping:
+            final_grouping[key] = []
+        final_grouping[key].append(summary)
+
+    for key in final_grouping:
+        final_grouping[key] = sorted(final_grouping[key], key=lambda x: x['total_skor'], reverse=True)
+
+    return final_grouping
 # --- Main execution ---
 if __name__ == '__main__':
     with app.app_context():
