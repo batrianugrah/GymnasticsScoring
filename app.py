@@ -147,6 +147,94 @@ def export_laporan_pdf(event_id):
         download_name=filename
     )
 
+@app.route('/laporan/master')
+def laporan_master_menu():
+    """Halaman untuk memilih Kategori & Grup untuk Master Peringkat."""
+    kategori_list = Kategori.query.order_by(Kategori.nama).all()
+    grup_list = Grup.query.order_by(Grup.nama).all()
+    return render_template('laporan_master_menu.html', kategori_list=kategori_list, grup_list=grup_list)
+
+@app.route('/laporan/master/hasil')
+def laporan_master_hasil():
+    """Menampilkan hasil Master Peringkat berdasarkan filter dinamis."""
+    # Ambil nilai filter dari URL. 'None' jika tidak ada.
+    kategori_id = request.args.get('kategori_id', type=int)
+    grup_id = request.args.get('grup_id', type=int)
+    alat_id = request.args.get('alat_id', type=int)
+
+    # Validasi: Kategori wajib dipilih.
+    if not kategori_id:
+        flash("Kategori wajib dipilih untuk membuat laporan.", "warning")
+        return redirect(url_for('laporan_master_menu'))
+
+    # Ambil objek dari database berdasarkan ID yang diterima
+    kategori = Kategori.query.get_or_404(kategori_id)
+    grup = Grup.query.get(grup_id) if grup_id else None
+    alat = Alat.query.get(alat_id) if alat_id else None
+    
+    # Panggil fungsi helper dengan semua filter
+    ranked_list = _calculate_master_ranking(kategori_id, grup_id, alat_id)
+    
+    # Tampilkan template hasil dengan semua data yang diperlukan
+    return render_template(
+        'laporan_master_hasil.html', 
+        ranked_list=ranked_list, 
+        kategori=kategori, 
+        grup=grup, 
+        alat=alat
+    )
+
+@app.route('/export/laporan/master/pdf')
+def export_laporan_master_pdf():
+    """Mengekspor laporan Master Peringkat yang dinamis ke format PDF."""
+    # Ambil nilai filter dari URL
+    kategori_id = request.args.get('kategori_id', type=int)
+    grup_id = request.args.get('grup_id', type=int)
+    alat_id = request.args.get('alat_id', type=int)
+
+    # Validasi: Kategori wajib ada
+    if not kategori_id:
+        return "Parameter 'kategori_id' tidak ditemukan.", 400
+
+    # Ambil objek dari database
+    kategori = Kategori.query.get_or_404(kategori_id)
+    grup = Grup.query.get(grup_id) if grup_id else None
+    alat = Alat.query.get(alat_id) if alat_id else None
+
+    # Panggil fungsi helper untuk mendapatkan data peringkat
+    ranked_list = _calculate_master_ranking(kategori_id, grup_id, alat_id)
+
+    # Render template HTML yang didesain khusus untuk PDF
+    # Kirim semua data yang diperlukan oleh template tersebut
+    rendered_html = render_template(
+        'laporan_master_pdf.html',
+        ranked_list=ranked_list,
+        kategori=kategori,
+        grup=grup,
+        alat=alat,
+        generation_date=datetime.now().strftime('%d %B %Y %H:%M:%S')
+    )
+    
+    # Gunakan WeasyPrint untuk mengubah HTML yang sudah dirender menjadi PDF
+    pdf = HTML(string=rendered_html).write_pdf()
+
+    # Buat nama file yang dinamis dan deskriptif
+    filename_parts = [
+        "Master_Peringkat",
+        kategori.nama.replace(' ', '_'),
+        grup.nama.replace(' ', '_') if grup else None,
+        alat.nama.replace(' ', '_') if alat else None
+    ]
+    filename = "-".join(filter(None, filename_parts)) + ".pdf"
+    
+    # Kirim file PDF sebagai respons untuk diunduh
+    return send_file(
+        io.BytesIO(pdf),
+        mimetype='application/pdf',
+        as_attachment=True,
+        download_name=filename
+    )
+
 @app.route('/peserta/<int:peserta_id>')
 def profil_peserta(peserta_id):
     peserta = Peserta.query.get_or_404(peserta_id)
@@ -508,6 +596,56 @@ def _calculate_all_around(event_id):
         final_grouping[key] = sorted(final_grouping[key], key=lambda x: x['total_skor'], reverse=True)
 
     return final_grouping
+
+def _calculate_master_ranking(kategori_id, grup_id=None, alat_id=None):
+    """
+    Menghitung peringkat gabungan dinamis berdasarkan filter yang diberikan.
+    - Jika alat_id ada, peringkat berdasarkan skor alat tersebut.
+    - Jika alat_id tidak ada, peringkat berdasarkan total skor All-Around.
+    """
+
+    # --- KONDISI 1: Peringkat berdasarkan SKOR ALAT TERTENTU ---
+    if alat_id:
+        query = db.session.query(Skor).join(Peserta)\
+                    .filter(Peserta.kategori_id == kategori_id)\
+                    .filter(Skor.alat_id == alat_id)
+
+        # Filter grup jika dipilih
+        if grup_id:
+            query = query.filter(Peserta.grup_id == grup_id)
+
+        # Urutkan berdasarkan nilai tertinggi dari alat tersebut
+        ranked_list = query.order_by(Skor.total_nilai.desc()).all()
+        # Ubah format agar konsisten dengan template (list of dicts)
+        return [{"peserta": skor.peserta, "skor_spesifik": skor.total_nilai} for skor in ranked_list]
+
+    # --- KONDISI 2: Peringkat berdasarkan TOTAL SKOR ALL-AROUND ---
+    else:
+        # Mulai dengan query Peserta berdasarkan Kategori
+        query = Peserta.query.filter(Peserta.kategori_id == kategori_id)
+
+        # Filter grup jika dipilih
+        if grup_id:
+            query = query.filter(Peserta.grup_id == grup_id)
+
+        pesertas = query.all()
+
+        summary_list = []
+        for peserta in pesertas:
+            total_skor = db.session.query(func.sum(Skor.total_nilai))\
+                                   .filter(Skor.peserta_id == peserta.id)\
+                                   .scalar() or 0.0
+            summary_list.append({
+                "peserta": peserta,
+                "total_skor_gabungan": total_skor
+            })
+
+        return sorted(summary_list, key=lambda x: x['total_skor_gabungan'], reverse=True)
+
+    # 3. Urutkan hasilnya berdasarkan total skor tertinggi
+    ranked_list = sorted(summary_list, key=lambda x: x['total_skor_gabungan'], reverse=True)
+    return ranked_list
+
 # --- Main execution ---
 if __name__ == '__main__':
     with app.app_context():

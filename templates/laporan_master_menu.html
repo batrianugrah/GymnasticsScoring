@@ -1,0 +1,40 @@
+{% extends 'layout.html' %}
+{% block title %}Master Peringkat Gabungan{% endblock %}
+{% block content %}
+<div class="text-center mb-5">
+    <h1 class="display-4">Master Peringkat</h1>
+    <p class="lead">Buat laporan peringkat gabungan dari seluruh event dengan filter dinamis.</p>
+</div>
+<div class="row justify-content-center">
+    <div class="col-md-6">
+        <div class="card shadow-sm">
+            <div class="card-body">
+                <form action="{{ url_for('laporan_master_hasil') }}" method="GET">
+                    <div class="mb-3">
+                        <label for="kategori_id" class="form-label">1. Pilih Kategori (Wajib)</label>
+                        <select id="kategori_id" name="kategori_id" class="form-select" required>
+                            <option value="">-- Pilih Kategori --</option>
+                            {% for k in kategori_list %}<option value="{{ k.id }}">{{ k.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="grup_id" class="form-label">2. Saring Berdasarkan Grup (Opsional)</label>
+                        <select id="grup_id" name="grup_id" class="form-select">
+                            <option value="">-- Semua Grup --</option>
+                            {% for g in grup_list %}<option value="{{ g.id }}">{{ g.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <div class="mb-3">
+                        <label for="alat_id" class="form-label">3. Saring Berdasarkan Alat (Opsional)</label>
+                        <select id="alat_id" name="alat_id" class="form-select">
+                            <option value="">-- Laporan All-Around --</option>
+                            {% for a in alat_list %}<option value="{{ a.id }}">{{ a.nama }}</option>{% endfor %}
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100">Tampilkan Laporan</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

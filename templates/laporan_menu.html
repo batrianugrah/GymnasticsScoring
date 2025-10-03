@@ -19,9 +19,15 @@
                         Lihat Laporan &rarr;
                     </a>
                 </div>
+                
             {% else %}
                 <div class="list-group-item text-center text-muted">Belum ada event yang dapat dilaporkan.</div>
             {% endfor %}
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ url_for('laporan_master_menu') }}" class="btn btn-outline-success">
+                Buat Master Peringkat (Gabungan Semua Event)
+            </a>
         </div>
     </div>
 </div>

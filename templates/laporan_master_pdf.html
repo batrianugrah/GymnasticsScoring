@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <title>Master Peringkat - {{ kategori.nama }} {% if grup %}- {{ grup.nama }}{% endif %}</title>
+    <style>
+        body { 
+            font-family: 'Helvetica', 'Arial', sans-serif; 
+            font-size: 10pt; 
+        }
+        .header { 
+            text-align: center; 
+            border-bottom: 2px solid black; 
+            padding-bottom: 10px; 
+            margin-bottom: 20px; 
+            position: relative; /* Diperlukan untuk positioning absolut logo */
+            height: 80px; /* Memberi ruang untuk header */
+        }
+        .header img { 
+            height: 70px; 
+            position: absolute;
+            left: 0;
+            top: 0;
+        }
+        .header h1 { 
+            margin: 0; 
+            font-size: 18pt; 
+            padding-top: 10px;
+        }
+        .header h2 { 
+            margin: 5px 0; 
+            font-size: 14pt; 
+            font-weight: normal;
+        }
+        .footer { 
+            position: fixed; 
+            bottom: -20px; /* Posisi sedikit di bawah halaman */
+            width: 100%; 
+            text-align: center; 
+            font-size: 8pt; 
+            color: #777; 
+        }
+        table { 
+            width: 100%; 
+            border-collapse: collapse; 
+            margin-bottom: 20px; 
+        }
+        th, td { 
+            border: 1px solid #ccc; 
+            padding: 8px; 
+            text-align: left; 
+        }
+        thead { 
+            background-color: #f2f2f2; 
+        }
+        th { 
+            font-weight: bold; 
+        }
+        .total-score { 
+            font-weight: bold; 
+            text-align: center;
+        }
+        .rank-col {
+            width: 5%;
+            text-align: center;
+        }
+        .score-col {
+            width: 20%;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <img src="{{ url_for('static', filename='img/kota.png', _external=True) }}">
+        <h1>MASTER PERINGKAT GABUNGAN</h1>
+        <h2>
+            {{ kategori.nama }}
+            {% if grup %}
+                - {{ grup.nama }}
+            {% else %}
+                - (Semua Grup)
+            {% endif %}
+        </h2>
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th class="rank-col">#</th>
+                <th>Nama Peserta</th>
+                <th>Daerah</th>
+                <th class="score-col">
+                    {% if alat %}
+                        Skor {{ alat.nama }}
+                    {% else %}
+                        Total Skor All-Around
+                    {% endif %}
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for item in ranked_list %}
+            <tr>
+                <td class="rank-col">{{ loop.index }}</td>
+                <td>{{ item.peserta.nama }}</td>
+                <td>{{ item.peserta.daerah.nama }}</td>
+                <td class="total-score">
+                    {% if alat %}
+                        {{ "%.3f"|format(item.skor_spesifik) }}
+                    {% else %}
+                        {{ "%.3f"|format(item.total_skor_gabungan) }}
+                    {% endif %}
+                </td>
+            </tr>
+            {% else %}
+            <tr>
+                <td colspan="4" style="text-align: center;">Tidak ada data peserta untuk kombinasi filter ini.</td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+    
+    <div class="footer">
+        Laporan ini dibuat secara otomatis oleh Sistem Gymnastics Scoring pada {{ generation_date }}
+    </div>
+</body>
+</html>
